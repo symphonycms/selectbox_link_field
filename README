@@ -1,0 +1,22 @@
+
+Select Box Link Field
+------------------------------------
+
+Version: 1.0
+Author: Symphony Team (team@symphony21.com)
+Build Date: 13th November 2008
+Requirements: Symphony Beta revision 5 or greater.
+
+
+[INSTALLATION]
+
+1. Upload the 'selectbox_link_field' folder in this archive to your Symphony 'extensions' folder.
+
+2. Enable it by selecting the "Field: Select Box Link ", choose Enable from the with-selected menu, then click Apply.
+
+3. You can now add the "Select Box Link" field to your sections.
+
+
+[USAGE]
+
+- Works in a near identical way to the standard select box field, however there is no static option and entries are linked internally via their ID, meaning that if an entry is changed, any Select Box Link fields will not lose their link to that entry.
