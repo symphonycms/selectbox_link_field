@@ -1,4 +1,3 @@
-
 Select Box Link Field
 ------------------------------------
 
@@ -7,6 +6,7 @@ Author: Symphony Team (team@symphony21.com)
 Build Date: 13th November 2008
 Requirements: Symphony Beta revision 5 or greater.
 
+A replacement field for the Section Link field of Symphony 2 Rev5
 
 [INSTALLATION]
 
@@ -19,4 +19,4 @@ Requirements: Symphony Beta revision 5 or greater.
 
 [USAGE]
 
-- Works in a near identical way to the standard select box field, however there is no static option and entries are linked internally via their ID, meaning that if an entry is changed, any Select Box Link fields will not lose their link to that entry.
+- Works in a near identical way to the standard select box field, however there is no static option and entries are linked internally via their ID, meaning that if an entry is changed, any Select Box Link fields will not lose their link to that entry. The data on the front-end is presented in a way identical to that of a Section Link.
