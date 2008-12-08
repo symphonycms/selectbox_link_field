@@ -7,14 +7,16 @@
 		function __construct(&$parent){
 			parent::__construct($parent);
 			$this->_name = 'Select Box Link';
+			$this->_required = true;
+			
+	    	// Set default
+			$this->set('show_column', 'no'); 
+			$this->set('required', 'yes');
+		}
 
-      // Set default
-      $this->set('show_column', 'no'); 
-    }
-
-    function canToggle(){
-      return ($this->get('allow_multiple_selection') == 'yes' ? false : true);
-    }
+		function canToggle(){
+			return ($this->get('allow_multiple_selection') == 'yes' ? false : true);
+		}
 
 		function canFilter(){
 			return true;
@@ -54,36 +56,40 @@
 
 		}
 
-    function prepareTableValue($data, XMLElement $link=NULL){
+		function prepareTableValue($data, XMLElement $link=NULL){
 
-      $label = $primary_field['value'];
+			$label = $primary_field['value'];
 
-      if($link){
-        $link->setValue(General::sanitize($label));
-        //$view = Widget::Anchor('(view)', URL . '/symphony/publish/'.$primary_field['section_handle'].'/edit/' . $entry_id . '/');
-        return $link->generate(); // . ' ' . $view->generate();
-      }
+			if($link){
+				$link->setValue(General::sanitize($label));
+				//$view = Widget::Anchor('(view)', URL . '/symphony/publish/'.$primary_field['section_handle'].'/edit/' . $entry_id . '/');
+				return $link->generate(); // . ' ' . $view->generate();
+			}
 
-      else{
-        if(is_array($data['relation_id'])) {
-          $result = array();
-          foreach($data['relation_id'] as $value){
-            if(!$value || !$primary_field = $this->__findPrimaryFieldValueFromRelationID($value)) return parent::prepareTableValue(NULL);
-            $entry_id = $value;
-            $link = Widget::Anchor($primary_field['value'], URL . '/symphony/publish/'.$primary_field['section_handle'].'/edit/' . $entry_id . '/');
-            $result[] = $link->generate();
-          }
-        foreach($result as $key => $value){ 
-          $output .= " " . $value; }
-        return $output;
-        }
-        else {
-          if(!$data['relation_id'] || !$primary_field = $this->__findPrimaryFieldValueFromRelationID($data['relation_id'])) return parent::prepareTableValue(NULL);
-          $entry_id = $data['relation_id'];
-          $link = Widget::Anchor($primary_field['value'], URL . '/symphony/publish/'.$primary_field['section_handle'].'/edit/' . $entry_id . '/');
-          return $link->generate(); }
-        }
-    }
+			else{
+				if(is_array($data['relation_id'])) {
+					$result = array();
+					foreach($data['relation_id'] as $value){
+						if(!$value || !$primary_field = $this->__findPrimaryFieldValueFromRelationID($value)) return parent::prepareTableValue(NULL);
+						$entry_id = $value;
+						$link = Widget::Anchor($primary_field['value'], URL . '/symphony/publish/'.$primary_field['section_handle'].'/edit/' . $entry_id . '/');
+						$result[] = $link->generate();
+					}
+					foreach($result as $key => $value){ 
+						$output .= " " . $value; 
+					}
+					return $output;
+				}
+				else{
+					if(!$data['relation_id'] || !$primary_field = $this->__findPrimaryFieldValueFromRelationID($data['relation_id'])){
+						return parent::prepareTableValue(NULL);
+					}
+					$entry_id = $data['relation_id'];
+					$link = Widget::Anchor($primary_field['value'], URL . '/symphony/publish/'.$primary_field['section_handle'].'/edit/' . $entry_id . '/');
+					return $link->generate(); 
+				}
+			}
+		}
 
 		private function __findPrimaryFieldValueFromRelationID($id){
 
@@ -116,43 +122,35 @@
 
 		}
 
-		/* function checkPostFieldData($data, &$message, $entry_id=NULL){
-
-			$message = NULL;
-
-			if(empty($data)){
-				$message = 'Records for this section must be created the proper way. Shoo';
-				return self::__MISSING_FIELDS__;
-			}
-
-			return self::__OK__;
-
-		} */
-
 		function processRawFieldData($data, &$status, $simulate=false, $entry_id=NULL){
 
 			$status = self::__OK__;
 			if(!is_array($data)) return array('relation_id' => $data);
 
-      if(empty($data)) return NULL;
-      
-      $result = array();
+			if(empty($data)) return NULL;
+		
+			$result = array();
 
-      foreach($data as $a => $value) { 
-        $result['relation_id'][] = $data[$a];
-      }
-      
-      return $result;
+			foreach($data as $a => $value) { 
+			  $result['relation_id'][] = $data[$a];
+			}
+		
+			return $result;
 
 		}
 
-    function fetchAssociatedEntrySearchValue($data){
-      if(!is_array($data)) return $data;
+		function fetchAssociatedEntrySearchValue($data){
+			if(!is_array($data)) return $data;
 
-      $searchvalue = $this->_engine->Database->fetchRow(0, "SELECT `entry_id` FROM `tbl_entries_data_".$this->get('related_field_id')."` WHERE `handle` = '".addslashes($data['handle'])."' LIMIT 1");
+			$searchvalue = $this->_engine->Database->fetchRow(0, 
+				sprintf("
+					SELECT `entry_id` FROM `tbl_entries_data_%d` 
+					WHERE `handle` = '%s' 
+					LIMIT 1", $this->get('related_field_id'), addslashes($data['handle']))
+			);
 
-      return $searchvalue['entry_id'];
-    }
+			return $searchvalue['entry_id'];
+		}
 
 		function fetchAssociatedEntryCount($value){
 			return $this->_engine->Database->fetchVar('count', 0, "SELECT count(*) AS `count` FROM `tbl_entries_data_".$this->get('id')."` WHERE `relation_id` = '$value'");
@@ -165,21 +163,21 @@
 		function appendFormattedElement(&$wrapper, $data, $encode=false){
 
 			if(!is_array($data) || empty($data)) return;
-      
-      $list = new XMLElement($this->get('element_name'));
-      if(!is_array($data['relation_id'])) $data['relation_id'] = array($data['relation_id']);
-      
-      foreach($data['relation_id'] as $value){
+		
+			$list = new XMLElement($this->get('element_name'));
+			if(!is_array($data['relation_id'])) $data['relation_id'] = array($data['relation_id']);
+		
+			foreach($data['relation_id'] as $value){
 
-      $primary_field = $this->__findPrimaryFieldValueFromRelationID($value);    
-      $section = $this->_engine->Database->fetchRow(0, "SELECT `id`, `handle` FROM `tbl_sections` WHERE `id` = '".$primary_field['parent_section']."' LIMIT 1");
+			$primary_field = $this->__findPrimaryFieldValueFromRelationID($value);    
+			$section = $this->_engine->Database->fetchRow(0, "SELECT `id`, `handle` FROM `tbl_sections` WHERE `id` = '".$primary_field['parent_section']."' LIMIT 1");
 
-      $item_handle = Lang::createHandle($primary_field['value']);
+			$item_handle = Lang::createHandle($primary_field['value']);
 
-        $list->appendChild(new XMLElement('item', ($encode ? General::sanitize($value) : $primary_field['value']), array('handle' => $item_handle, 'id' => $value)));
-      }
+			  $list->appendChild(new XMLElement('item', ($encode ? General::sanitize($value) : $primary_field['value']), array('handle' => $item_handle, 'id' => $value)));
+			}
 
-      $wrapper->appendChild($list);
+			$wrapper->appendChild($list);
 
 		}
 		
@@ -203,94 +201,71 @@
 		function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
 
 			$states = $this->findOptions();
-      $options = array();
+			$options = array();
+			
+			if($this->get('required') != 'yes') $options[] = array(NULL, false, NULL);
+			
+			if(is_array($data['relation_id'])) {
+				$entry_id = array();
 
-        if(is_array($data['relation_id'])) {
-          $entry_id = array();
-          foreach($data['relation_id'] as $value) { 
-            $entry_id[] = $value;
-          }
-          foreach($states as $id => $v){
-            if (in_array($id, $entry_id)) {
-              $options[] = array($id, TRUE, $v);}
-            else { $options[] = array($id, FALSE, $v); }
-          }
-        }
-        else {
-          $entry_id = $data['relation_id'];
-          foreach($states as $id => $v){
-            $options[] = array($id, $id == $entry_id, $v);
-          }
-      }
-      
-      $fieldname = 'fields'.$fieldnamePrefix.'['.$this->get('element_name').']'.$fieldnamePostfix;
-      if($this->get('allow_multiple_selection') == 'yes') $fieldname .= '[]';
-      
-      $label = Widget::Label($this->get('label'));
-      $label->appendChild(Widget::Select($fieldname, $options, ($this->get('allow_multiple_selection') == 'yes' ? array('multiple' => 'multiple') : NULL)));
-      
-      if($flagWithError != NULL) $wrapper->appendChild(Widget::wrapFormElementWithError($label, $flagWithError));
-      else $wrapper->appendChild($label); 
-		}
+				foreach($data['relation_id'] as $value) { 
+					$entry_id[] = $value;
+				}
 
-/*		function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
-
-			$fieldname = 'fields'.$fieldnamePrefix.'['.$this->get('element_name').']'.$fieldnamePostfix;
-
-			$label = Widget::Label($this->get('label'));
-
-			$span = new XMLElement('span');
-
-			if(is_array($data['relation_id'])) $entry_id = $data['relation_id'][0];
-			else $entry_id = $data['relation_id'];
-
-			if(!$primary_field = $this->__findPrimaryFieldValueFromRelationID($entry_id)){
-				$span->setValue('None');
-				$flagWithError = 'Records for this section must be created the proper way. Shoo';
+				foreach($states as $id => $v){
+					if (in_array($id, $entry_id)) {
+						$options[] = array($id, TRUE, $v);
+					}
+					
+					else{ 
+						$options[] = array($id, FALSE, $v);
+					}
+				}
 			}
-
 			else{
-
-				$text = $data['relation_id'] . ': ' . $primary_field['value'];
-				$span->appendChild(Widget::Anchor(General::sanitize($text), URL . '/symphony/publish/'.$primary_field['section_handle'].'/edit/' . $entry_id . '/'));
-				$span->appendChild(Widget::Input($fieldname, $data['relation_id'], 'hidden'));
-
+				$entry_id = $data['relation_id'];
+				foreach($states as $id => $v){
+					$options[] = array($id, $id == $entry_id, $v);
+				}
 			}
-
-			$label->appendChild($span);
-
+		
+			$fieldname = 'fields'.$fieldnamePrefix.'['.$this->get('element_name').']'.$fieldnamePostfix;
+			if($this->get('allow_multiple_selection') == 'yes') $fieldname .= '[]';
+		
+			$label = Widget::Label($this->get('label'));
+			$label->appendChild(Widget::Select($fieldname, $options, ($this->get('allow_multiple_selection') == 'yes' ? array('multiple' => 'multiple') : NULL)));
+		
 			if($flagWithError != NULL) $wrapper->appendChild(Widget::wrapFormElementWithError($label, $flagWithError));
-			else $wrapper->appendChild($label);
-
-		}*/
+			else $wrapper->appendChild($label); 
+		}
 		
 		function commit(){
 
 			if(!parent::commit()) return false;
-      
-      $id = $this->get('id');
+		
+			$id = $this->get('id');
 
-      if($id === false) return false;
-      
-      $fields = array();
-      
-      $fields['field_id'] = $id;
-      if($this->get('related_field_id') != '') $fields['related_field_id'] = $this->get('related_field_id');
-      $fields['allow_multiple_selection'] = ($this->get('allow_multiple_selection') ? $this->get('allow_multiple_selection') : 'no');
+			if($id === false) return false;
 
-      $this->Database->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id'");
-      
-      if(!$this->Database->insert($fields, 'tbl_fields_' . $this->handle())) return false;
+			$fields = array();
 
-      $sections = $this->get('related_field_id');
+			$fields['field_id'] = $id;
+			if($this->get('related_field_id') != '') $fields['related_field_id'] = $this->get('related_field_id');
+			$fields['allow_multiple_selection'] = ($this->get('allow_multiple_selection') ? $this->get('allow_multiple_selection') : 'no');
 
-      $this->removeSectionAssociation($id);
-      
-      $section_id = $this->Database->fetchVar('parent_section', 0, "SELECT `parent_section` FROM `tbl_fields` WHERE `id` = '".$fields['related_field_id']."' LIMIT 1");
+			$this->Database->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id'");
 
-      $this->createSectionAssociation(NULL, $id, $this->get('related_field_id'));
-      
-      return true;
+			if(!$this->Database->insert($fields, 'tbl_fields_' . $this->handle())) return false;
+
+			$sections = $this->get('related_field_id');
+
+			$this->removeSectionAssociation($id);
+
+			$section_id = $this->Database->fetchVar('parent_section', 0, "SELECT `parent_section` FROM `tbl_fields` WHERE `id` = '".$fields['related_field_id']."' LIMIT 1");
+
+			$this->createSectionAssociation(NULL, $id, $this->get('related_field_id'));
+
+			return true;
 					
 		}
 
@@ -321,9 +296,9 @@
 
 		}
 
-    function findDefaults(&$fields){
-      if(!isset($fields['allow_multiple_selection'])) $fields['allow_multiple_selection'] = 'no';
-    }
+		function findDefaults(&$fields){
+			if(!isset($fields['allow_multiple_selection'])) $fields['allow_multiple_selection'] = 'no';
+		}
 
 		function displaySettingsPanel(&$wrapper, $errors=NULL){		
 			
@@ -334,11 +309,12 @@
 			$label = Widget::Label('Options');
 			
 			$sectionManager = new SectionManager($this->_engine);
-		    $sections = $sectionManager->fetch(NULL, 'ASC', 'name');
+		  	$sections = $sectionManager->fetch(NULL, 'ASC', 'name');
 			$field_groups = array();
 			
-			if(is_array($sections) && !empty($sections))
+			if(is_array($sections) && !empty($sections)){
 				foreach($sections as $section) $field_groups[$section->get('id')] = array('fields' => $section->fetchFields(), 'section' => $section);
+			}
 			
 			$options = array();
 			
@@ -368,56 +344,22 @@
 			$wrapper->appendChild($label);
 			
 			$this->appendShowColumnCheckbox($wrapper);
+			$this->appendRequiredCheckbox($wrapper);
 						
 		}
 
-
-		//function displaySettingsPanel(&$wrapper, $errors=NULL){
-        //
-		//	parent::displaySettingsPanel($wrapper, $errors);
-        //
-		//	$sql = "SELECT DISTINCT s.`id`, s.`name` 
-		//			FROM tbl_sections AS `s` ".($this->get('parent_section') != '' ? " WHERE `s`.id != '".$this->get('parent_section')."'" : '')."
-		//			ORDER BY s.`sortorder`";
-        //
-		//	$sections = $this->Database->fetch($sql);
-        //
-		//	$association_sections = $this->get('section_association_list');
-        //
-		//	if(!is_array($association_sections)){
-		//		$association_sections = preg_split('/\,\s*/i', $association_sections, -1, PREG_SPLIT_NO_EMPTY);
-		//		$association_sections = array_map('trim', $association_sections);
-		//	}
-        //
-		//	## Section
-		//	$label = Widget::Label('Related Section');
-        //
-		//	$options = array();
-        //
-		//	if(is_array($sections) && !empty($sections)){
-		//		foreach($sections as $s) $options[] = array($s['id'], in_array($s['id'], $association_sections), $s['name']);
-		//	}			
-        //
-		//	$label->appendChild(Widget::Select('fields['.$this->get('sortorder').'][section_association_list][]', $options, array('multiple' => 'multiple')));
-        //
-		//	if(isset($errors['section_association_list'])) $wrapper->appendChild(Widget::wrapFormElementWithError($label, $errors['section_association_list']));
-		//	else $wrapper->appendChild($label);
-        //
-		//	$this->appendShowColumnCheckbox($wrapper);
-        //
-		//}
 
 		function createTable(){
 
 			return $this->_engine->Database->query(
 
 				"CREATE TABLE IF NOT EXISTS `tbl_entries_data_" . $this->get('id') . "` (
-				  `id` int(11) unsigned NOT NULL auto_increment,
-				  `entry_id` int(11) unsigned NOT NULL,
-				  `relation_id` int(11) unsigned NOT NULL,
-				  PRIMARY KEY  (`id`),
-				  KEY `entry_id` (`entry_id`),
-				  KEY `relation_id` (`relation_id`)
+				`id` int(11) unsigned NOT NULL auto_increment,
+				`entry_id` int(11) unsigned NOT NULL,
+				`relation_id` int(11) unsigned NOT NULL,
+				PRIMARY KEY  (`id`),
+				KEY `entry_id` (`entry_id`),
+				KEY `relation_id` (`relation_id`)
 				) TYPE=MyISAM;"
 
 			);
@@ -428,74 +370,3 @@
 		}			
 
 	}
-
-
-
-/*		function findOptions(){
-
-			$values = array();
-
-			$sql = "SELECT DISTINCT `value`, `entry_id` FROM `tbl_entries_data_".$this->get('related_field_id')."`
-					ORDER BY `value` DESC";
-					
-			if($results = $this->Database->fetch($sql)){
-				foreach($results as $r){
-					$values[$r['entry_id']] = $r['value'];
-				}
-			}
-			
-			return $values;
-
-		}
-
-				
-		function displaySettingsPanel(&$wrapper, $errors=NULL){		
-			
-			parent::displaySettingsPanel($wrapper, $errors);
-
-			$div = new XMLElement('div', NULL, array('class' => 'group'));
-			
-			$label = Widget::Label('Options');
-			
-			$sectionManager = new SectionManager($this->_engine);
-		    $sections = $sectionManager->fetch(NULL, 'ASC', 'name');
-			$field_groups = array();
-			
-			if(is_array($sections) && !empty($sections))
-				foreach($sections as $section) $field_groups[$section->get('id')] = array('fields' => $section->fetchFields(), 'section' => $section);
-			
-			$options = array(
-				array('', false, 'None'),
-			);
-			
-			foreach($field_groups as $group){
-				
-				if(!is_array($group['fields'])) continue;
-				
-				$fields = array();
-				foreach($group['fields'] as $f){
-					if($f->get('id') != $this->get('id') && $f->canPrePopulate()) $fields[] = array($f->get('id'), ($this->get('related_field_id') == $f->get('id')), $f->get('label'));
-				}
-				
-				if(is_array($fields) && !empty($fields)) $options[] = array('label' => $group['section']->get('name'), 'options' => $fields);
-			}
-			
-			$label->appendChild(Widget::Select('fields['.$this->get('sortorder').'][related_field_id]', $options));
-			$div->appendChild($label);
-						
-			if(isset($errors['related_field_id'])) $wrapper->appendChild(Widget::wrapFormElementWithError($div, $errors['related_field_id']));
-			else $wrapper->appendChild($div);
-						
-			## Allow selection of multiple items
-			$label = Widget::Label();
-			$input = Widget::Input('fields['.$this->get('sortorder').'][allow_multiple_selection]', 'yes', 'checkbox');
-			if($this->get('allow_multiple_selection') == 'yes') $input->setAttribute('checked', 'checked');			
-			$label->setValue($input->generate() . ' Allow selection of multiple options');
-			$wrapper->appendChild($label);
-			
-			$this->appendShowColumnCheckbox($wrapper);
-						
-		}
-
-	*/
-

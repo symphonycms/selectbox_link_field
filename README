@@ -1,12 +1,13 @@
 Select Box Link Field
 ------------------------------------
 
-Version: 1.0
+Version: 1.1
 Author: Symphony Team (team@symphony21.com)
-Build Date: 13th November 2008
+Build Date: 8th Dec 2008
 Requirements: Symphony Beta revision 5 or greater.
 
 A replacement field for the Section Link field of Symphony 2 Rev5
+
 
 [INSTALLATION]
 
@@ -19,4 +20,17 @@ A replacement field for the Section Link field of Symphony 2 Rev5
 
 [USAGE]
 
-- Works in a near identical way to the standard select box field, however there is no static option and entries are linked internally via their ID, meaning that if an entry is changed, any Select Box Link fields will not lose their link to that entry. The data on the front-end is presented in a way identical to that of a Section Link.
+- Works in a near identical way to the standard select box field, however there is no static 
+option and entries are linked internally via their ID, meaning that if an entry is changed,
+any Select Box Link fields will not lose their link to that entry. The data on the front-end 
+is presented in a way identical to that of a Section Link.
+
+- Setting an instance of the field to be not required will cause an empty option to show up on
+the publish form.
+
+
+
+[CHANGE LOG]
+
+1.1 	- Added ability to set field to required/not required.
+	- Added multi-select property (thanks to czheng)
