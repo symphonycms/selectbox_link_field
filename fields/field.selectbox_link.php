@@ -57,38 +57,45 @@
 		}
 
 		function prepareTableValue($data, XMLElement $link=NULL){
-
-			$label = $primary_field['value'];
-
-			if($link){
-				$link->setValue(General::sanitize($label));
-				//$view = Widget::Anchor('(view)', URL . '/symphony/publish/'.$primary_field['section_handle'].'/edit/' . $entry_id . '/');
-				return $link->generate(); // . ' ' . $view->generate();
+			$result = array();
+			
+			if(!is_array($data) || (is_array($data) && !isset($data['relation_id']))) return parent::prepareTableValue(NULL);
+			
+			if(!is_array($data['relation_id'])){
+				$data['relation_id'] = array($data['relation_id']);
 			}
-
-			else{
-				if(is_array($data['relation_id'])) {
-					$result = array();
-					foreach($data['relation_id'] as $value){
-						if(!$value || !$primary_field = $this->__findPrimaryFieldValueFromRelationID($value)) return parent::prepareTableValue(NULL);
-						$entry_id = $value;
-						$link = Widget::Anchor($primary_field['value'], URL . '/symphony/publish/'.$primary_field['section_handle'].'/edit/' . $entry_id . '/');
-						$result[] = $link->generate();
-					}
-					foreach($result as $key => $value){ 
-						$output .= " " . $value; 
-					}
-					return $output;
+				
+			foreach($data['relation_id'] as $relation_id){
+				if((int)$relation_id <= 0) continue;
+				
+				$primary_field = $this->__findPrimaryFieldValueFromRelationID($relation_id);
+				
+				if(!is_array($primary_field) || empty($primary_field)){
+					continue;
 				}
-				else{
-					if(!$data['relation_id'] || !$primary_field = $this->__findPrimaryFieldValueFromRelationID($data['relation_id'])){
-						return parent::prepareTableValue(NULL);
-					}
-					$entry_id = $data['relation_id'];
-					$link = Widget::Anchor($primary_field['value'], URL . '/symphony/publish/'.$primary_field['section_handle'].'/edit/' . $entry_id . '/');
-					return $link->generate(); 
-				}
+				
+				$result[$relation_id] = $primary_field;
+				
 			}
+			
+			if(!is_null($link)){
+				$label = NULL;
+				foreach($result as $item){
+					$label .= ' ' . $item['value'];
+				}
+				$link->setValue(General::sanitize(trim($label)));
+				return $link->generate();
+			}
+			
+			$output = NULL;
+
+			foreach($result as $relation_id => $item){
+				$link = Widget::Anchor($item['value'], sprintf('%s/symphony/publish/%s/edit/%d/', URL, $item['section_handle'], $relation_id));
+					
+				$output .= $link->generate() . ' ';
+			}
+			
+			return trim($output);
 		}
 
 		private function __findPrimaryFieldValueFromRelationID($id){

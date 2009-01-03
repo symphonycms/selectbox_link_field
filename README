@@ -1,9 +1,9 @@
 Select Box Link Field
 ------------------------------------
 
-Version: 1.2
+Version: 1.3
 Author: Symphony Team (team@symphony21.com)
-Build Date: 3rd Jan 2009
+Build Date: 4th Jan 2009
 Requirements: Symphony Beta revision 5 or greater.
 
 A replacement field for the Section Link field of Symphony 2 Rev5
@@ -31,6 +31,9 @@ the publish form.
 
 
 [CHANGE LOG]
+
+1.3		- Fixed bug introduced in 1.2 that caused table values to disappear if the first field
+		  of the section is a "Select Box Link".
 
 1.2		- Should correctly work with fields that do now use a 'value' column in the 
 		  database. This would cause an empty select box.
