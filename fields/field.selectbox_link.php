@@ -169,10 +169,10 @@
 		
 			foreach($data['relation_id'] as $value){
 
-			$primary_field = $this->__findPrimaryFieldValueFromRelationID($value);    
-			$section = $this->_engine->Database->fetchRow(0, "SELECT `id`, `handle` FROM `tbl_sections` WHERE `id` = '".$primary_field['parent_section']."' LIMIT 1");
+				$primary_field = $this->__findPrimaryFieldValueFromRelationID($value);    
+				$section = $this->_engine->Database->fetchRow(0, "SELECT `id`, `handle` FROM `tbl_sections` WHERE `id` = '".$primary_field['parent_section']."' LIMIT 1");
 
-			$item_handle = Lang::createHandle($primary_field['value']);
+				$item_handle = Lang::createHandle($primary_field['value']);
 
 			  $list->appendChild(new XMLElement('item', ($encode ? General::sanitize($value) : $primary_field['value']), array('handle' => $item_handle, 'id' => $value)));
 			}
@@ -185,12 +185,13 @@
 
 			$values = array();
 
-			$sql = "SELECT DISTINCT `value`, `entry_id` FROM `tbl_entries_data_".$this->get('related_field_id')."`
-					ORDER BY `value` DESC";
+			$sql = "SELECT DISTINCT `entry_id` FROM `tbl_entries_data_".$this->get('related_field_id')."`
+					ORDER BY `entry_id` DESC";
 
 			if($results = $this->Database->fetch($sql)){
 				foreach($results as $r){
-					$values[$r['entry_id']] = $r['value'];
+					$value = $this->__findPrimaryFieldValueFromRelationID($r['entry_id']);
+					$values[$r['entry_id']] = $value['value'];
 				}
 			}
 
@@ -201,6 +202,7 @@
 		function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
 
 			$states = $this->findOptions();
+
 			$options = array();
 			
 			if($this->get('required') != 'yes') $options[] = array(NULL, false, NULL);
