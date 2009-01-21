@@ -12,6 +12,7 @@
 	    	// Set default
 			$this->set('show_column', 'no'); 
 			$this->set('required', 'yes');
+			$this->set('limit', 20);
 		}
 
 		function canToggle(){
@@ -32,6 +33,18 @@
 
 		public function getParameterPoolValue($data){
 			return $data['relation_id'];
+		}		
+
+		public function set($field, $value){
+			if($field == 'related_field_id' && !is_array($value)){
+				$value = explode(',', $value);
+			}
+			$this->_fields[$field] = $value;
+		}
+		
+		public function setArray($array){
+			if(empty($array) || !is_array($array)) return;
+			foreach($array as $field => $value) $this->set($field, $value);
 		}		
 
 		function groupRecords($records){
@@ -102,14 +115,16 @@
 			return trim($output);
 		}
 
-		private function __findPrimaryFieldValueFromRelationID($id){
-
+		private function __findPrimaryFieldValueFromRelationID($entry_id){
+			
+			$field_id = $this->findFieldIDFromRelationID($entry_id);
+			
 			$primary_field = $this->Database->fetchRow(0,
 
 				"SELECT `f`.*, `s`.handle AS `section_handle`
 				 FROM `tbl_fields` AS `f`
 				 INNER JOIN `tbl_sections` AS `s` ON `s`.id = `f`.parent_section
-				 WHERE `f`.id = '".$this->get('related_field_id')."'
+				 WHERE `f`.id = '{$field_id}'
 				 ORDER BY `f`.sortorder ASC 
 				 LIMIT 1"
 
@@ -121,8 +136,8 @@
 
 			$data = $this->Database->fetchRow(0, 
 				"SELECT *
-				 FROM `tbl_entries_data_".$this->get('related_field_id')."`
-				 WHERE `entry_id` = '$id' ORDER BY `id` DESC LIMIT 1"
+				 FROM `tbl_entries_data_{$field_id}`
+				 WHERE `entry_id` = '{$entry_id}' ORDER BY `id` DESC LIMIT 1"
 			);
 
 			if(empty($data)) return NULL;
@@ -192,18 +207,64 @@
 
 		}
 		
-		function findOptions(){
+		public function findFieldIDFromRelationID($id){
+			
+			## Figure out the section
+			$section_id = $this->Database->fetchVar('section_id', 0, "SELECT `section_id` FROM `tbl_entries` WHERE `id` = {$id} LIMIT 1");
+			
+			## Figure out which related_field_id is from that section
+			$field_id = $this->Database->fetchVar('field_id', 0, "SELECT f.`id` AS `field_id`
+				FROM `tbl_fields` AS `f` 
+				LEFT JOIN `tbl_sections` AS `s` ON f.parent_section = s.id
+				WHERE `s`.id = {$section_id} AND f.id IN ('".implode("', '", $this->get('related_field_id'))."') LIMIT 1");
+				
+			return $field_id;
+			
+		}
+		
+		public function findOptions(array $existing_selection=NULL){
 
 			$values = array();
+			$limit = $this->get('limit');
 
-			$sql = "SELECT DISTINCT `entry_id` FROM `tbl_entries_data_".$this->get('related_field_id')."`
-					ORDER BY `entry_id` DESC";
+			foreach($this->get('related_field_id') as $field_id){
+				
+				$section = $this->Database->fetchRow(0, "SELECT s.name, s.id
+					 									FROM `tbl_sections` AS `s` 
+														LEFT JOIN `tbl_fields` AS `f` ON `s`.id = `f`.parent_section
+														WHERE `f`.id = '{$field_id}'
+														LIMIT 1");
+				
+				$group = array('name' => $section['name'], 'section' => $section['id'], 'values' => array());
+				
+				$sql = "SELECT DISTINCT `entry_id` 
+						FROM `tbl_entries_data_{$field_id}`
+						ORDER BY `entry_id` DESC
+						LIMIT 0, {$limit}";
 
-			if($results = $this->Database->fetch($sql)){
-				foreach($results as $r){
-					$value = $this->__findPrimaryFieldValueFromRelationID($r['entry_id']);
-					$values[$r['entry_id']] = $value['value'];
+				$results = $this->Database->fetchCol('entry_id', $sql);
+	
+				if(!is_null($existing_selection) && !empty($existing_selection)){
+					foreach($existing_selection as $key => $entry_id){
+						$x = $this->findFieldIDFromRelationID($entry_id);
+
+						if($x == $field_id){
+							$results[] = $entry_id;
+							//unset($existing_selection[$key]);
+						}
+					}
 				}
+	
+				rsort($results);
+	
+				if(is_array($results) && !empty($results)){
+					foreach($results as $entry_id){
+						$value = $this->__findPrimaryFieldValueFromRelationID($entry_id);
+						$group['values'][$entry_id] = $value['value'];
+					}
+				}
+
+				$values[] = $group;
 			}
 
 			return $values;
@@ -211,37 +272,32 @@
 		}		
 
 		function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
+	
+			if(!is_array($data['relation_id'])){
+				$entry_ids = array($data['relation_id']);
+			}
+			
+			else{
+				$entry_ids = array_keys($data['relation_id']);
+			}
+			
+			$states = $this->findOptions($entry_ids);
 
-			$states = $this->findOptions();
-
+			
 			$options = array();
 			
 			if($this->get('required') != 'yes') $options[] = array(NULL, false, NULL);
 			
-			if(is_array($data['relation_id'])) {
-				$entry_id = array();
-
-				foreach($data['relation_id'] as $value) { 
-					$entry_id[] = $value;
-				}
-
-				foreach($states as $id => $v){
-					if (in_array($id, $entry_id)) {
-						$options[] = array($id, TRUE, $v);
+			if(!empty($states)){
+				foreach($states as $s){
+					$group = array('label' => $s['name'], 'options' => array());
+					foreach($s['values'] as $id => $v){
+						$group['options'][] = array($id, in_array($id, $entry_ids), $v);
 					}
-					
-					else{ 
-						$options[] = array($id, FALSE, $v);
-					}
+					$options[] = $group;
 				}
 			}
-			else{
-				$entry_id = $data['relation_id'];
-				foreach($states as $id => $v){
-					$options[] = array($id, $id == $entry_id, $v);
-				}
-			}
-		
+
 			$fieldname = 'fields'.$fieldnamePrefix.'['.$this->get('element_name').']'.$fieldnamePostfix;
 			if($this->get('allow_multiple_selection') == 'yes') $fieldname .= '[]';
 		
@@ -265,18 +321,22 @@
 			$fields['field_id'] = $id;
 			if($this->get('related_field_id') != '') $fields['related_field_id'] = $this->get('related_field_id');
 			$fields['allow_multiple_selection'] = ($this->get('allow_multiple_selection') ? $this->get('allow_multiple_selection') : 'no');
-
+			$fields['limit'] = max(1, (int)$this->get('limit'));
+			$fields['related_field_id'] = implode(',', $this->get('related_field_id'));
+			
 			$this->Database->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id'");
 
 			if(!$this->Database->insert($fields, 'tbl_fields_' . $this->handle())) return false;
 
-			$sections = $this->get('related_field_id');
+			//$sections = $this->get('related_field_id');
 
 			$this->removeSectionAssociation($id);
 
-			$section_id = $this->Database->fetchVar('parent_section', 0, "SELECT `parent_section` FROM `tbl_fields` WHERE `id` = '".$fields['related_field_id']."' LIMIT 1");
-
-			$this->createSectionAssociation(NULL, $id, $this->get('related_field_id'));
+			//$section_id = $this->Database->fetchVar('parent_section', 0, "SELECT `parent_section` FROM `tbl_fields` WHERE `id` = '".$fields['related_field_id']."' LIMIT 1");
+			
+			foreach($this->get('related_field_id') as $field_id){
+				$this->createSectionAssociation(NULL, $id, $field_id);
+			}
 
 			return true;
 					
@@ -314,7 +374,7 @@
 		}
 
 		function displaySettingsPanel(&$wrapper, $errors=NULL){		
-			
+
 			parent::displaySettingsPanel($wrapper, $errors);
 
 			$div = new XMLElement('div', NULL, array('class' => 'group'));
@@ -337,17 +397,27 @@
 				
 				$fields = array();
 				foreach($group['fields'] as $f){
-					if($f->get('id') != $this->get('id') && $f->canPrePopulate()) $fields[] = array($f->get('id'), ($this->get('related_field_id') == $f->get('id')), $f->get('label'));
+					if($f->get('id') != $this->get('id') && $f->canPrePopulate()){
+						$fields[] = array($f->get('id'), in_array($f->get('id'), $this->get('related_field_id')), $f->get('label'));
+					}
 				}
 				
 				if(is_array($fields) && !empty($fields)) $options[] = array('label' => $group['section']->get('name'), 'options' => $fields);
 			}
 
-			$label->appendChild(Widget::Select('fields['.$this->get('sortorder').'][related_field_id]', $options));
+			$label->appendChild(Widget::Select('fields['.$this->get('sortorder').'][related_field_id][]', $options, array('multiple' => 'multiple')));
+			
 			$div->appendChild($label);
 						
 			if(isset($errors['related_field_id'])) $wrapper->appendChild(Widget::wrapFormElementWithError($div, $errors['related_field_id']));
 			else $wrapper->appendChild($div);
+				
+			## Maximum entries
+			$label = Widget::Label();
+			$input = Widget::Input('fields['.$this->get('sortorder').'][limit]', $this->get('limit'));
+			$input->setAttribute('size', '3');
+			$label->setValue('Limit to the ' . $input->generate() . ' most recent entries');
+			$wrapper->appendChild($label);
 						
 			## Allow selection of multiple items
 			$label = Widget::Label();

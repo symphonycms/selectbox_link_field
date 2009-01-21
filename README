@@ -1,9 +1,9 @@
 Select Box Link Field
 ------------------------------------
 
-Version: 1.4
+Version: 1.5
 Author: Symphony Team (team@symphony21.com)
-Build Date: 5th Jan 2009
+Build Date: 21st Jan 2009
 Requirements: Symphony Beta revision 5 or greater.
 
 A replacement field for the Section Link field of Symphony 2 Rev5
@@ -16,6 +16,12 @@ A replacement field for the Section Link field of Symphony 2 Rev5
 2. Enable it by selecting the "Field: Select Box Link ", choose Enable from the with-selected menu, then click Apply.
 
 3. You can now add the "Select Box Link" field to your sections.
+
+
+[UPDATING]
+
+1. Be sure to visit the Extension page in the Symphony admin and 
+   enable "Select Box Link Field" so the database is updated accordingly.
 
 
 [USAGE]
@@ -31,6 +37,9 @@ the publish form.
 
 
 [CHANGE LOG]
+
+1.5		- Added a limit to the number of entries shown in select box
+		- Allowed selection of multiple source sections
 
 1.4		- Enable Data Source param output for this field
 
