@@ -165,14 +165,15 @@
 
 		}
 
-		function fetchAssociatedEntrySearchValue($data){
+		function fetchAssociatedEntrySearchValue($data, $field_id){
+
 			if(!is_array($data)) return $data;
 
 			$searchvalue = $this->_engine->Database->fetchRow(0, 
 				sprintf("
 					SELECT `entry_id` FROM `tbl_entries_data_%d` 
 					WHERE `handle` = '%s' 
-					LIMIT 1", $this->get('related_field_id'), addslashes($data['handle']))
+					LIMIT 1", $field_id, addslashes($data['handle']))
 			);
 
 			return $searchvalue['entry_id'];
