@@ -20,7 +20,7 @@
 			
 			if(version_compare($previousVersion, '1.4', 'eq')){
 				$this->_Parent->Database->query("ALTER TABLE `tbl_fields_selectbox_link` ADD `limit` INT(4) UNSIGNED NOT NULL DEFAULT '20'");
-				$this->_Parent->Database->query("ALTER TABLE `sym_fields_selectbox_link` CHANGE `related_field_id` `related_field_id` VARCHAR(255) NOT NULL");
+				$this->_Parent->Database->query("ALTER TABLE `tbl_fields_selectbox_link` CHANGE `related_field_id` `related_field_id` VARCHAR(255) NOT NULL");
 			}
 			
 			return true;
