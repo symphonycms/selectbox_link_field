@@ -187,25 +187,30 @@
 			return $this->_engine->Database->fetchCol('entry_id', "SELECT `entry_id` FROM `tbl_entries_data_".$this->get('id')."` WHERE `relation_id` = '$value'");
 		}		
 
-		function appendFormattedElement(&$wrapper, $data, $encode=false){
-
-			if(!is_array($data) || empty($data)) return;
-		
+		public function appendFormattedElement(&$wrapper, $data, $encode = false) {
+			if (!is_array($data) || empty($data)) return;
+			
 			$list = new XMLElement($this->get('element_name'));
-			if(!is_array($data['relation_id'])) $data['relation_id'] = array($data['relation_id']);
-		
-			foreach($data['relation_id'] as $value){
-
-				$primary_field = $this->__findPrimaryFieldValueFromRelationID($value);    
-				$section = $this->_engine->Database->fetchRow(0, "SELECT `id`, `handle` FROM `tbl_sections` WHERE `id` = '".$primary_field['parent_section']."' LIMIT 1");
-
-				$item_handle = Lang::createHandle($primary_field['value']);
-
-			  $list->appendChild(new XMLElement('item', ($encode ? General::sanitize($value) : $primary_field['value']), array('handle' => $item_handle, 'id' => $value)));
+			
+			if (!is_array($data['relation_id'])) {
+				$data['relation_id'] = array($data['relation_id']);
 			}
-
+			
+			foreach ($data['relation_id'] as $relation_id) {
+				$field = $this->__findPrimaryFieldValueFromRelationID($relation_id);    
+				$section = $this->_engine->Database->fetchRow(0, "SELECT `id`, `handle` FROM `tbl_sections` WHERE `id` = '{$field['parent_section']}' LIMIT 1");
+				$handle = Lang::createHandle($field['value']);
+				$value = General::sanitize($field['value']);
+				
+				if ($encode) $item_value = General::sanitize($value);
+				
+				$list->appendChild(new XMLElement('item', $value, array(
+					'handle'	=> $handle,
+					'id'		=> $relation_id
+				)));
+			}
+			
 			$wrapper->appendChild($list);
-
 		}
 		
 		public function findFieldIDFromRelationID($id){
