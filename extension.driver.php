@@ -4,7 +4,7 @@
 	
 		public function about(){
 			return array('name' => 'Field: Select Box Link',
-						 'version' => '1.5',
+						 'version' => '1.6',
 						 'release-date' => '2009-01-21',
 						 'author' => array('name' => 'Symphony Team',
 										   'website' => 'http://www.symphony21.com',
@@ -18,11 +18,12 @@
 		
 		public function update($previousVersion){
 			
-			if(version_compare($previousVersion, '1.4', 'eq')){
+			if(version_compare($previousVersion, '1.6', '<')){
+
 				$this->_Parent->Database->query("ALTER TABLE `tbl_fields_selectbox_link` ADD `limit` INT(4) UNSIGNED NOT NULL DEFAULT '20'");
 				$this->_Parent->Database->query("ALTER TABLE `tbl_fields_selectbox_link` CHANGE `related_field_id` `related_field_id` VARCHAR(255) NOT NULL");
 			}
-			
+
 			return true;
 		}
 
