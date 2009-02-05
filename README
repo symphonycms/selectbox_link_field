@@ -1,9 +1,9 @@
 Select Box Link Field
 ------------------------------------
 
-Version: 1.5
+Version: 1.6
 Author: Symphony Team (team@symphony21.com)
-Build Date: 21st Jan 2009
+Build Date: 5th Feb 2009
 Requirements: Symphony Beta revision 5 or greater.
 
 A replacement field for the Section Link field of Symphony 2 Rev5
@@ -37,6 +37,8 @@ the publish form.
 
 
 [CHANGE LOG]
+
+1.6		- Fixed problems with updating from a version earlier than 1.4
 
 1.5		- Added a limit to the number of entries shown in select box
 		- Allowed selection of multiple source sections
