@@ -6,7 +6,7 @@
 		
 		function __construct(&$parent){
 			parent::__construct($parent);
-			$this->_name = 'Select Box Link';
+			$this->_name = __('Select Box Link');
 			$this->_required = true;
 			
 	    	// Set default
@@ -202,30 +202,25 @@
 			return $this->_engine->Database->fetchCol('entry_id', "SELECT `entry_id` FROM `tbl_entries_data_".$this->get('id')."` WHERE `relation_id` = '$value'");
 		}		
 
-		public function appendFormattedElement(&$wrapper, $data, $encode = false) {
-			if (!is_array($data) || empty($data)) return;
-			
+		function appendFormattedElement(&$wrapper, $data, $encode=false){
+
+			if(!is_array($data) || empty($data)) return;
+		
 			$list = new XMLElement($this->get('element_name'));
-			
-			if (!is_array($data['relation_id'])) {
-				$data['relation_id'] = array($data['relation_id']);
+			if(!is_array($data['relation_id'])) $data['relation_id'] = array($data['relation_id']);
+		
+			foreach($data['relation_id'] as $value){
+
+				$primary_field = $this->__findPrimaryFieldValueFromRelationID($value);    
+				$section = $this->_engine->Database->fetchRow(0, "SELECT `id`, `handle` FROM `tbl_sections` WHERE `id` = '".$primary_field['parent_section']."' LIMIT 1");
+
+				$item_handle = Lang::createHandle($primary_field['value']);
+
+			  $list->appendChild(new XMLElement('item', ($encode ? General::sanitize($value) : $primary_field['value']), array('handle' => $item_handle, 'id' => $value)));
 			}
-			
-			foreach ($data['relation_id'] as $relation_id) {
-				$field = $this->__findPrimaryFieldValueFromRelationID($relation_id);    
-				$section = $this->_engine->Database->fetchRow(0, "SELECT `id`, `handle` FROM `tbl_sections` WHERE `id` = '{$field['parent_section']}' LIMIT 1");
-				$handle = Lang::createHandle($field['value']);
-				$value = General::sanitize($field['value']);
-				
-				if ($encode) $item_value = General::sanitize($value);
-				
-				$list->appendChild(new XMLElement('item', $value, array(
-					'handle'	=> $handle,
-					'id'		=> $relation_id
-				)));
-			}
-			
+
 			$wrapper->appendChild($list);
+
 		}
 		
 		public function findFieldIDFromRelationID($id){
@@ -399,7 +394,7 @@
 
 			$div = new XMLElement('div', NULL, array('class' => 'group'));
 			
-			$label = Widget::Label('Options');
+			$label = Widget::Label(__('Options'));
 			
 			$sectionManager = new SectionManager($this->_engine);
 		  	$sections = $sectionManager->fetch(NULL, 'ASC', 'name');
@@ -436,14 +431,14 @@
 			$label = Widget::Label();
 			$input = Widget::Input('fields['.$this->get('sortorder').'][limit]', $this->get('limit'));
 			$input->setAttribute('size', '3');
-			$label->setValue('Limit to the ' . $input->generate() . ' most recent entries');
+			$label->setValue(__('Limit to the %s most recent entries', array($input->generate())));
 			$wrapper->appendChild($label);
 						
 			## Allow selection of multiple items
 			$label = Widget::Label();
 			$input = Widget::Input('fields['.$this->get('sortorder').'][allow_multiple_selection]', 'yes', 'checkbox');
 			if($this->get('allow_multiple_selection') == 'yes') $input->setAttribute('checked', 'checked');			
-			$label->setValue($input->generate() . ' Allow selection of multiple options');
+			$label->setValue($input->generate() . ' ' . __('Allow selection of multiple options'));
 			$wrapper->appendChild($label);
 			
 			$this->appendShowColumnCheckbox($wrapper);
