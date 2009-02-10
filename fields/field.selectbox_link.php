@@ -165,8 +165,11 @@
 
 		}
 
-		function fetchAssociatedEntrySearchValue($data, $field_id){
-
+		function fetchAssociatedEntrySearchValue($data, $field_id=NULL, $parent_entry_id=NULL){
+			
+			// We dont care about $data, but instead $parent_entry_id
+			if(!is_null($parent_entry_id)) return $parent_entry_id;
+			
 			if(!is_array($data)) return $data;
 
 			$searchvalue = $this->_engine->Database->fetchRow(0, 
