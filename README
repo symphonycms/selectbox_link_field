@@ -1,9 +1,9 @@
 Select Box Link Field
 ------------------------------------
 
-Version: 1.7
+Version: 1.8
 Author: Symphony Team (team@symphony21.com)
-Build Date: 10th Feb 2009
+Build Date: 13th Feb 2009
 Requirements: Symphony Beta revision 5 or greater.
 
 A replacement field for the Section Link field of Symphony 2 Rev5
@@ -37,6 +37,8 @@ the publish form.
 
 
 [CHANGE LOG]
+
+1.8 	- Fixed bug that caused no items to appear selected in publish area
 
 1.7		- Updated fetchAssociatedEntrySearchValue() to make use of entry id passed in, if available
 

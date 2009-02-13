@@ -287,11 +287,10 @@
 			}
 			
 			else{
-				$entry_ids = array_keys($data['relation_id']);
+				$entry_ids = array_values($data['relation_id']);
 			}
 			
 			$states = $this->findOptions($entry_ids);
-
 			
 			$options = array();
 			
