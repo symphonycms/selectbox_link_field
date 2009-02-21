@@ -21,8 +21,10 @@
 			if(version_compare($previousVersion, '1.6', '<')){
 
 				$this->_Parent->Database->query("ALTER TABLE `tbl_fields_selectbox_link` ADD `limit` INT(4) UNSIGNED NOT NULL DEFAULT '20'");
-				$this->_Parent->Database->query("ALTER TABLE `tbl_fields_selectbox_link` CHANGE `related_field_id` `related_field_id` VARCHAR(255) NOT NULL");
 			}
+
+			$this->_Parent->Database->query("ALTER TABLE `tbl_fields_selectbox_link` CHANGE `related_field_id` `related_field_id` VARCHAR(255) NOT NULL");
+			
 
 			return true;
 		}
@@ -33,7 +35,7 @@
 				  `id` int(11) unsigned NOT NULL auto_increment,
 				  `field_id` int(11) unsigned NOT NULL,
 				  `allow_multiple_selection` enum('yes','no') NOT NULL default 'no',
-				  `related_field_id` int(11) unsigned default NULL,
+				  `related_field_id` VARCHAR(255) NOT NULL,
 				  `limit` int(4) unsigned NOT NULL default '20',
 			  PRIMARY KEY  (`id`),
 			  KEY `field_id` (`field_id`)
