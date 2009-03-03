@@ -352,7 +352,7 @@
 
 		function buildSortingSQL(&$joins, &$where, &$sort, $order='ASC'){
 			$joins .= "INNER JOIN `tbl_entries_data_".$this->get('id')."` AS `ed` ON (`e`.`id` = `ed`.`entry_id`) ";
-			$sort = 'ORDER BY ' . (strtolower($order) == 'random' ? 'RAND()' : "`ed`.`relation_id` $order");
+			$sort = 'ORDER BY ' . (in_array(strtolower($order), array('random', 'rand')) ? 'RAND()' : "`ed`.`relation_id` $order");
 		}
 
 		function buildDSRetrivalSQL($data, &$joins, &$where, $andOperation=false){
@@ -406,7 +406,7 @@
 				$fields = array();
 				foreach($group['fields'] as $f){
 					if($f->get('id') != $this->get('id') && $f->canPrePopulate()){
-						$fields[] = array($f->get('id'), in_array($f->get('id'), $this->get('related_field_id')), $f->get('label'));
+						$fields[] = array($f->get('id'), @in_array($f->get('id'), $this->get('related_field_id')), $f->get('label'));
 					}
 				}
 				

@@ -1,12 +1,10 @@
 Select Box Link Field
 ------------------------------------
 
-Version: 1.8
+Version: 1.9
 Author: Symphony Team (team@symphony21.com)
-Build Date: 13th Feb 2009
-Requirements: Symphony Beta revision 5 or greater.
-
-A replacement field for the Section Link field of Symphony 2 Rev5
+Build Date: 3rd March 2009
+Requirements: Symphony 2.0
 
 
 [INSTALLATION]
@@ -37,6 +35,9 @@ the publish form.
 
 
 [CHANGE LOG]
+
+1.9		- Warnings about incorrect data type, origination from line 409, are now suppressed
+		- Fixed sorting to work when "random" is selected
 
 1.8 	- Fixed bug that caused no items to appear selected in publish area
 
