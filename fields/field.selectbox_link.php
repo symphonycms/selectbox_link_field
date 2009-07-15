@@ -18,6 +18,18 @@
 		function canToggle(){
 			return ($this->get('allow_multiple_selection') == 'yes' ? false : true);
 		}
+		
+		function getToggleStates(){
+			$options = $this->findOptions();
+			$output = $options[0]['values'];
+			$output[""] = "None";
+			return $output;
+		}
+		
+		function toggleFieldData($data, $new_value){
+			$data['relation_id'] = $new_value;
+			return $data;
+		}
 
 		function canFilter(){
 			return true;
