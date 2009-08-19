@@ -1,10 +1,8 @@
 <?php
-
-	if(!defined('__IN_SYMPHONY__')) die('<h2>Symphony Error</h2><p>You cannot directly access this file</p>');
 	
 	Class fieldSelectBox_Link extends Field{
 		
-		function __construct(&$parent){
+		public function __construct(&$parent){
 			parent::__construct($parent);
 			$this->_name = __('Select Box Link');
 			$this->_required = true;
@@ -15,31 +13,31 @@
 			$this->set('limit', 20);
 		}
 
-		function canToggle(){
+		public function canToggle(){
 			return ($this->get('allow_multiple_selection') == 'yes' ? false : true);
 		}
 		
-		function getToggleStates(){
+		public function getToggleStates(){
 			$options = $this->findOptions();
 			$output = $options[0]['values'];
-			$output[""] = "None";
+			$output[''] = 'None';
 			return $output;
 		}
 		
-		function toggleFieldData($data, $new_value){
+		public function toggleFieldData($data, $new_value){
 			$data['relation_id'] = $new_value;
 			return $data;
 		}
 
-		function canFilter(){
+		public function canFilter(){
 			return true;
 		}
 
-		function allowDatasourceOutputGrouping(){
+		public function allowDatasourceOutputGrouping(){
 			return true;
 		}
 		
-		function allowDatasourceParamOutput(){
+		public function allowDatasourceParamOutput(){
 			return true;
 		}
 
@@ -59,7 +57,7 @@
 			foreach($array as $field => $value) $this->set($field, $value);
 		}		
 
-		function groupRecords($records){
+		public function groupRecords($records){
 
 			if(!is_array($records) || empty($records)) return;
 
@@ -85,7 +83,7 @@
 
 		}
 
-		function prepareTableValue($data, XMLElement $link=NULL){
+		public function prepareTableValue($data, XMLElement $link=NULL){
 			$result = array();
 			
 			if(!is_array($data) || (is_array($data) && !isset($data['relation_id']))) return parent::prepareTableValue(NULL);
@@ -160,7 +158,7 @@
 
 		}
 
-		function processRawFieldData($data, &$status, $simulate=false, $entry_id=NULL){
+		public function processRawFieldData($data, &$status, $simulate=false, $entry_id=NULL){
 
 			$status = self::__OK__;
 			if(!is_array($data)) return array('relation_id' => $data);
@@ -177,7 +175,7 @@
 
 		}
 
-		function fetchAssociatedEntrySearchValue($data, $field_id=NULL, $parent_entry_id=NULL){
+		public function fetchAssociatedEntrySearchValue($data, $field_id=NULL, $parent_entry_id=NULL){
 			
 			// We dont care about $data, but instead $parent_entry_id
 			if(!is_null($parent_entry_id)) return $parent_entry_id;
@@ -194,15 +192,15 @@
 			return $searchvalue['entry_id'];
 		}
 
-		function fetchAssociatedEntryCount($value){
+		public function fetchAssociatedEntryCount($value){
 			return $this->_engine->Database->fetchVar('count', 0, "SELECT count(*) AS `count` FROM `tbl_entries_data_".$this->get('id')."` WHERE `relation_id` = '$value'");
 		}
 
-		function fetchAssociatedEntryIDs($value){
+		public function fetchAssociatedEntryIDs($value){
 			return $this->_engine->Database->fetchCol('entry_id', "SELECT `entry_id` FROM `tbl_entries_data_".$this->get('id')."` WHERE `relation_id` = '$value'");
 		}		
 
-		function appendFormattedElement(&$wrapper, $data, $encode=false){
+		public function appendFormattedElement(&$wrapper, $data, $encode=false){
 
 			if(!is_array($data) || empty($data)) return;
 		
@@ -287,14 +285,18 @@
 
 		}		
 
-		function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
-	
-			if(!is_array($data['relation_id'])){
-				$entry_ids = array($data['relation_id']);
-			}
+		public function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
+		
+			$entry_ids = array();
+		
+			if(isset($data['relation_id'])){
+				if(!is_array($data['relation_id'])){
+					$entry_ids = array($data['relation_id']);
+				}
 			
-			else{
-				$entry_ids = array_values($data['relation_id']);
+				else{
+					$entry_ids = array_values($data['relation_id']);
+				}
 			}
 			
 			$states = $this->findOptions($entry_ids);
@@ -323,7 +325,7 @@
 			else $wrapper->appendChild($label); 
 		}
 		
-		function commit(){
+		public function commit(){
 
 			if(!parent::commit()) return false;
 		
@@ -357,12 +359,12 @@
 					
 		}
 
-		function buildSortingSQL(&$joins, &$where, &$sort, $order='ASC'){
+		public function buildSortingSQL(&$joins, &$where, &$sort, $order='ASC'){
 			$joins .= "INNER JOIN `tbl_entries_data_".$this->get('id')."` AS `ed` ON (`e`.`id` = `ed`.`entry_id`) ";
 			$sort = 'ORDER BY ' . (in_array(strtolower($order), array('random', 'rand')) ? 'RAND()' : "`ed`.`relation_id` $order");
 		}
 
-		function buildDSRetrivalSQL($data, &$joins, &$where, $andOperation=false){
+		public function buildDSRetrivalSQL($data, &$joins, &$where, $andOperation=false){
 
 			$field_id = $this->get('id');
 
@@ -384,11 +386,11 @@
 
 		}
 
-		function findDefaults(&$fields){
+		public function findDefaults(&$fields){
 			if(!isset($fields['allow_multiple_selection'])) $fields['allow_multiple_selection'] = 'no';
 		}
 
-		function displaySettingsPanel(&$wrapper, $errors=NULL){		
+		public function displaySettingsPanel(&$wrapper, $errors=NULL){		
 
 			parent::displaySettingsPanel($wrapper, $errors);
 
@@ -447,7 +449,7 @@
 		}
 
 
-		function createTable(){
+		public function createTable(){
 
 			return $this->_engine->Database->query(
 

@@ -1,9 +1,9 @@
 Select Box Link Field
 ------------------------------------
 
-Version: 1.10
+Version: 1.11
 Author: Symphony Team (team@symphony21.com)
-Build Date: 27th July 2009
+Build Date: 19th Aug 2009
 Requirements: Symphony 2.0
 
 
@@ -11,7 +11,7 @@ Requirements: Symphony 2.0
 
 1. Upload the 'selectbox_link_field' folder in this archive to your Symphony 'extensions' folder.
 
-2. Enable it by selecting the "Field: Select Box Link ", choose Enable from the with-selected menu, then click Apply.
+2. Enable it by selecting the "Field: Select Box Link", choose Enable from the with-selected menu, then click Apply.
 
 3. You can now add the "Select Box Link" field to your sections.
 
@@ -36,8 +36,10 @@ the publish form.
 
 [CHANGE LOG]
 
+1.11	- Fixed bug that triggered a database error in Symphony version greater than 2.0.6
+
 1.10 	- Added translations
-	- Possible to toggle values via publish tables
+		- Possible to toggle values via publish tables
 
 1.9		- Warnings about incorrect data type, origination from line 409, are now suppressed
 		- Fixed sorting to work when "random" is selected

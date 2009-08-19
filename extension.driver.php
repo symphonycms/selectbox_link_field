@@ -4,8 +4,8 @@
 	
 		public function about(){
 			return array('name' => 'Field: Select Box Link',
-						 'version' => '1.10',
-						 'release-date' => '2009-07-27',
+						 'version' => '1.11',
+						 'release-date' => '2009-08-19',
 						 'author' => array('name' => 'Symphony Team',
 										   'website' => 'http://www.symphony21.com',
 										   'email' => 'team@symphony21.com')
