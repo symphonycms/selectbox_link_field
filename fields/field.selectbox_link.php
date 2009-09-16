@@ -395,7 +395,7 @@
 			$label = Widget::Label(__('Options'));
 			
 			$sectionManager = new SectionManager($this->_engine);
-		  	$sections = $sectionManager->fetch(NULL, 'ASC', 'name');
+		  	$sections = $sectionManager->fetch(NULL, 'ASC', 'sortorder');
 			$field_groups = array();
 			
 			if(is_array($sections) && !empty($sections)){
