@@ -222,6 +222,7 @@
 		}
 		
 		public function findFieldIDFromRelationID($id){
+			if (!$this->get('related_field_id')) return null;
 			
 			## Figure out the section
 			$section_id = $this->Database->fetchVar('section_id', 0, "SELECT `section_id` FROM `tbl_entries` WHERE `id` = {$id} LIMIT 1");
@@ -240,7 +241,9 @@
 
 			$values = array();
 			$limit = $this->get('limit');
-
+			
+			if (!$this->get('related_field_id')) return $values;
+			
 			foreach($this->get('related_field_id') as $field_id){
 				
 				$section = $this->Database->fetchRow(0, "SELECT s.name, s.id
