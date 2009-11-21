@@ -1,8 +1,10 @@
 <?php
+
+	if(!defined('__IN_SYMPHONY__')) die('<h2>Symphony Error</h2><p>You cannot directly access this file</p>');
 	
 	Class fieldSelectBox_Link extends Field{
 		
-		public function __construct(&$parent){
+		function __construct(&$parent){
 			parent::__construct($parent);
 			$this->_name = __('Select Box Link');
 			$this->_required = true;
@@ -13,31 +15,31 @@
 			$this->set('limit', 20);
 		}
 
-		public function canToggle(){
+		function canToggle(){
 			return ($this->get('allow_multiple_selection') == 'yes' ? false : true);
 		}
 		
-		public function getToggleStates(){
+		function getToggleStates(){
 			$options = $this->findOptions();
 			$output = $options[0]['values'];
-			$output[''] = 'None';
+			$output[""] = "None";
 			return $output;
 		}
 		
-		public function toggleFieldData($data, $new_value){
+		function toggleFieldData($data, $new_value){
 			$data['relation_id'] = $new_value;
 			return $data;
 		}
 
-		public function canFilter(){
+		function canFilter(){
 			return true;
 		}
 
-		public function allowDatasourceOutputGrouping(){
+		function allowDatasourceOutputGrouping(){
 			return true;
 		}
 		
-		public function allowDatasourceParamOutput(){
+		function allowDatasourceParamOutput(){
 			return true;
 		}
 
@@ -57,7 +59,7 @@
 			foreach($array as $field => $value) $this->set($field, $value);
 		}		
 
-		public function groupRecords($records){
+		function groupRecords($records){
 
 			if(!is_array($records) || empty($records)) return;
 
@@ -83,7 +85,7 @@
 
 		}
 
-		public function prepareTableValue($data, XMLElement $link=NULL){
+		function prepareTableValue($data, XMLElement $link=NULL){
 			$result = array();
 			
 			if(!is_array($data) || (is_array($data) && !isset($data['relation_id']))) return parent::prepareTableValue(NULL);
@@ -158,7 +160,7 @@
 
 		}
 
-		public function processRawFieldData($data, &$status, $simulate=false, $entry_id=NULL){
+		function processRawFieldData($data, &$status, $simulate=false, $entry_id=NULL){
 
 			$status = self::__OK__;
 			if(!is_array($data)) return array('relation_id' => $data);
@@ -175,7 +177,7 @@
 
 		}
 
-		public function fetchAssociatedEntrySearchValue($data, $field_id=NULL, $parent_entry_id=NULL){
+		function fetchAssociatedEntrySearchValue($data, $field_id=NULL, $parent_entry_id=NULL){
 			
 			// We dont care about $data, but instead $parent_entry_id
 			if(!is_null($parent_entry_id)) return $parent_entry_id;
@@ -192,15 +194,15 @@
 			return $searchvalue['entry_id'];
 		}
 
-		public function fetchAssociatedEntryCount($value){
+		function fetchAssociatedEntryCount($value){
 			return $this->_engine->Database->fetchVar('count', 0, "SELECT count(*) AS `count` FROM `tbl_entries_data_".$this->get('id')."` WHERE `relation_id` = '$value'");
 		}
 
-		public function fetchAssociatedEntryIDs($value){
+		function fetchAssociatedEntryIDs($value){
 			return $this->_engine->Database->fetchCol('entry_id', "SELECT `entry_id` FROM `tbl_entries_data_".$this->get('id')."` WHERE `relation_id` = '$value'");
 		}		
 
-		public function appendFormattedElement(&$wrapper, $data, $encode=false){
+		function appendFormattedElement(&$wrapper, $data, $encode=false){
 
 			if(!is_array($data) || empty($data)) return;
 		
@@ -222,7 +224,6 @@
 		}
 		
 		public function findFieldIDFromRelationID($id){
-			if (!$this->get('related_field_id')) return null;
 			
 			## Figure out the section
 			$section_id = $this->Database->fetchVar('section_id', 0, "SELECT `section_id` FROM `tbl_entries` WHERE `id` = {$id} LIMIT 1");
@@ -241,35 +242,37 @@
 
 			$values = array();
 			$limit = $this->get('limit');
-			
-			if (!$this->get('related_field_id')) return $values;
-			
-			// find the sections of the related fields
-			$sections = $this->Database->fetch("SELECT DISTINCT (s.id), s.name, f.id as `field_id`
-				 								FROM `tbl_sections` AS `s` 
-												LEFT JOIN `tbl_fields` AS `f` ON `s`.id = `f`.parent_section
-												WHERE `f`.id IN ('" . implode("','", $this->get('related_field_id')) . "')
-												ORDER BY s.sortorder ASC");
-			
-			foreach($sections as $section){
 
+			foreach($this->get('related_field_id') as $field_id){
+				
+				$section = $this->Database->fetchRow(0, "SELECT s.name, s.id
+					 									FROM `tbl_sections` AS `s` 
+														LEFT JOIN `tbl_fields` AS `f` ON `s`.id = `f`.parent_section
+														WHERE `f`.id = '{$field_id}'
+														LIMIT 1");
+				
 				$group = array('name' => $section['name'], 'section' => $section['id'], 'values' => array());
 				
-				// build a list of entry IDs with the correct sort order
-				$entryManager = new EntryManager($this->_Parent->_Parent);
-				$entries = $entryManager->fetch(NULL, $section['id'], $limit, 0);
-				
-				$results = array();
-				foreach($entries as $entry) $results[] = $entry->get('id');
-				
-				// if a value is already selected, ensure it is added to the list (if it isn't in the available options)
+				$sql = "SELECT DISTINCT `entry_id` 
+						FROM `tbl_entries_data_{$field_id}`
+						ORDER BY `entry_id` DESC
+						LIMIT 0, {$limit}";
+
+				$results = $this->Database->fetchCol('entry_id', $sql);
+	
 				if(!is_null($existing_selection) && !empty($existing_selection)){
 					foreach($existing_selection as $key => $entry_id){
 						$x = $this->findFieldIDFromRelationID($entry_id);
-						if($x == $section['field_id']) $results[] = $entry_id;
+
+						if($x == $field_id){
+							$results[] = $entry_id;
+							//unset($existing_selection[$key]);
+						}
 					}
 				}
-				
+	
+				rsort($results);
+	
 				if(is_array($results) && !empty($results)){
 					foreach($results as $entry_id){
 						$value = $this->__findPrimaryFieldValueFromRelationID($entry_id);
@@ -284,18 +287,14 @@
 
 		}		
 
-		public function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
-		
-			$entry_ids = array();
-		
-			if(isset($data['relation_id'])){
-				if(!is_array($data['relation_id'])){
-					$entry_ids = array($data['relation_id']);
-				}
+		function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
+	
+			if(!is_array($data['relation_id'])){
+				$entry_ids = array($data['relation_id']);
+			}
 			
-				else{
-					$entry_ids = array_values($data['relation_id']);
-				}
+			else{
+				$entry_ids = array_values($data['relation_id']);
 			}
 			
 			$states = $this->findOptions($entry_ids);
@@ -324,7 +323,7 @@
 			else $wrapper->appendChild($label); 
 		}
 		
-		public function commit(){
+		function commit(){
 
 			if(!parent::commit()) return false;
 		
@@ -358,14 +357,38 @@
 					
 		}
 
-		public function buildSortingSQL(&$joins, &$where, &$sort, $order='ASC'){
+		function buildSortingSQL(&$joins, &$where, &$sort, $order='ASC'){
 			$joins .= "INNER JOIN `tbl_entries_data_".$this->get('id')."` AS `ed` ON (`e`.`id` = `ed`.`entry_id`) ";
 			$sort = 'ORDER BY ' . (in_array(strtolower($order), array('random', 'rand')) ? 'RAND()' : "`ed`.`relation_id` $order");
 		}
 
-		public function buildDSRetrivalSQL($data, &$joins, &$where, $andOperation=false){
+		function buildDSRetrivalSQL($data, &$joins, &$where, $andOperation=false){
 
 			$field_id = $this->get('id');
+			
+			foreach($data as $key => &$value){
+			
+				//for now, I assume string values are the only possible handles.
+				//ofcourse, this is not entirely true, but I find it good enough.
+				if(!is_numeric($value)){
+					//numeric returned false, so the value is in fact a handle, not an id.
+					
+					//replace the handle with it's id, for processing in the database.
+					//I wanted to do this in one query, but since the result from the first becomes a table of the second, this is not possible..
+					$return = Frontend::instance()->Database->fetchRow(0,"select related_field_id from `tbl_fields_selectbox_link` where field_id='$field_id' LIMIT 1");
+					$return = Frontend::instance()->Database->fetchRow(0,"select entry_id as id from `tbl_entries_data_{$return['related_field_id']}` where handle='$value' LIMIT 1");
+					
+					//if no id's can be found with that handle, the filter might as well be skipped.
+					if(empty($return[id]){
+						unset($data[$key]);
+					}
+					else{
+						$value = $return[id];
+					}
+				}
+				
+			}
+					
 
 			if($andOperation):
 
@@ -380,16 +403,16 @@
 				$where .= " AND `t$field_id`.relation_id IN ('".@implode("', '", $data)."') ";
 
 			endif;
-
+			
 			return true;
 
 		}
-
-		public function findDefaults(&$fields){
+		
+		function findDefaults(&$fields){
 			if(!isset($fields['allow_multiple_selection'])) $fields['allow_multiple_selection'] = 'no';
 		}
 
-		public function displaySettingsPanel(&$wrapper, $errors=NULL){		
+		function displaySettingsPanel(&$wrapper, $errors=NULL){		
 
 			parent::displaySettingsPanel($wrapper, $errors);
 
@@ -398,7 +421,7 @@
 			$label = Widget::Label(__('Options'));
 			
 			$sectionManager = new SectionManager($this->_engine);
-		  	$sections = $sectionManager->fetch(NULL, 'ASC', 'sortorder');
+		  	$sections = $sectionManager->fetch(NULL, 'ASC', 'name');
 			$field_groups = array();
 			
 			if(is_array($sections) && !empty($sections)){
@@ -448,7 +471,7 @@
 		}
 
 
-		public function createTable(){
+		function createTable(){
 
 			return $this->_engine->Database->query(
 
