@@ -379,7 +379,7 @@
 					$return = Frontend::instance()->Database->fetchRow(0,"select entry_id as id from `tbl_entries_data_{$return['related_field_id']}` where handle='$value' LIMIT 1");
 					
 					//if no id's can be found with that handle, the filter might as well be skipped.
-					if(empty($return[id]){
+					if(empty($return[id])){
 						unset($data[$key]);
 					}
 					else{
