@@ -1,7 +1,7 @@
 Select Box Link Field
 ------------------------------------
 
-Version: 1.12
+Version: 1.13
 Author: Symphony Team (team@symphony21.com)
 Build Date: 26th Oct 2009
 Requirements: Symphony 2.0
@@ -35,6 +35,7 @@ the publish form.
 
 
 [CHANGE LOG]
+1.13	- Added filtering by handle functionality (CreativeDutchmen)
 
 1.12	- Fixed a couple of issues where 'related_field_id' was returning the wrong type. (rowan)
 		- In dropdown options, sort Sections by their Symphony order and sort Entries by their Symphony order (using EntryManager) (Nick Dunn)
