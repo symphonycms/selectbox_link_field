@@ -1,7 +1,7 @@
 <?php
 
 	Class extension_selectbox_link_field extends Extension{
-	
+
 		public function about(){
 			return array('name' => 'Field: Select Box Link',
 						 'version' => '1.13',
@@ -17,20 +17,16 @@
 		}
 		
 		public function update($previousVersion){
-			
 			if(version_compare($previousVersion, '1.6', '<')){
-
 				Symphony::Database()->query("ALTER TABLE `tbl_fields_selectbox_link` ADD `limit` INT(4) UNSIGNED NOT NULL DEFAULT '20'");
 			}
 
 			Symphony::Database()->query("ALTER TABLE `tbl_fields_selectbox_link` CHANGE `related_field_id` `related_field_id` VARCHAR(255) NOT NULL");
-			
 
 			return true;
 		}
 
 		public function install(){
-
 			return Symphony::Database()->query("CREATE TABLE IF NOT EXISTS `tbl_fields_selectbox_link` (
 				  `id` int(11) unsigned NOT NULL auto_increment,
 				  `field_id` int(11) unsigned NOT NULL,
@@ -40,8 +36,6 @@
 			  PRIMARY KEY  (`id`),
 			  KEY `field_id` (`field_id`)
 			)");
-
 		}
-			
-	}
 
+	}
