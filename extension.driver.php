@@ -13,17 +13,17 @@
 		}
 		
 		public function uninstall(){
-			$this->_Parent->Database->query("DROP TABLE `tbl_fields_selectbox_link`");
+			Symphony::Database()->query("DROP TABLE `tbl_fields_selectbox_link`");
 		}
 		
 		public function update($previousVersion){
 			
 			if(version_compare($previousVersion, '1.6', '<')){
 
-				$this->_Parent->Database->query("ALTER TABLE `tbl_fields_selectbox_link` ADD `limit` INT(4) UNSIGNED NOT NULL DEFAULT '20'");
+				Symphony::Database()->query("ALTER TABLE `tbl_fields_selectbox_link` ADD `limit` INT(4) UNSIGNED NOT NULL DEFAULT '20'");
 			}
 
-			$this->_Parent->Database->query("ALTER TABLE `tbl_fields_selectbox_link` CHANGE `related_field_id` `related_field_id` VARCHAR(255) NOT NULL");
+			Symphony::Database()->query("ALTER TABLE `tbl_fields_selectbox_link` CHANGE `related_field_id` `related_field_id` VARCHAR(255) NOT NULL");
 			
 
 			return true;
@@ -31,7 +31,7 @@
 
 		public function install(){
 
-			return $this->_Parent->Database->query("CREATE TABLE `tbl_fields_selectbox_link` (
+			return Symphony::Database()->query("CREATE TABLE IF NOT EXISTS `tbl_fields_selectbox_link` (
 				  `id` int(11) unsigned NOT NULL auto_increment,
 				  `field_id` int(11) unsigned NOT NULL,
 				  `allow_multiple_selection` enum('yes','no') NOT NULL default 'no',
