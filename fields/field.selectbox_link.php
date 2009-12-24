@@ -232,7 +232,7 @@
 			$field_id = $this->Database->fetchVar('field_id', 0, "SELECT f.`id` AS `field_id`
 				FROM `tbl_fields` AS `f` 
 				LEFT JOIN `tbl_sections` AS `s` ON f.parent_section = s.id
-				WHERE `s`.id = {$section_id} AND f.id IN ('".implode("', '", $this->get('related_field_id'))."') LIMIT 1");
+				WHERE `s`.id = {$section_id} AND f.id IN ('".@implode("', '", $this->get('related_field_id'))."') LIMIT 1");
 				
 			return $field_id;
 			
