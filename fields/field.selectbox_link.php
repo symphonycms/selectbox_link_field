@@ -372,18 +372,18 @@
 			
 			foreach($data as $key => &$value){
 			
-				//for now, I assume string values are the only possible handles.
-				//ofcourse, this is not entirely true, but I find it good enough.
+				// for now, I assume string values are the only possible handles.
+				// ofcourse, this is not entirely true, but I find it good enough.
 				if(!is_numeric($value)){
-					//numeric returned false, so the value is in fact a handle, not an id.
+					// numeric returned false, so the value is in fact a handle, not an id.
 					
-					//replace the handle with it's id, for processing in the database.
-					//I wanted to do this in one query, but since the result from the first becomes a table of the second, this is not possible..
+					// replace the handle with it's id, for processing in the database.
+					// I wanted to do this in one query, but since the result from the first becomes a table of the second, this is not possible..
 					$return = Frontend::instance()->Database->fetchRow(0,"select related_field_id from `tbl_fields_selectbox_link` where field_id='$field_id' LIMIT 1");
 					$return = Frontend::instance()->Database->fetchRow(0,"select entry_id as id from `tbl_entries_data_{$return['related_field_id']}` where handle='$value' LIMIT 1");
-					
-					//Skipping returns wrong results when doing an AND operation, return 0 instead.
-					if(empty($return[id])){
+
+					// Skipping returns wrong results when doing an AND operation, return 0 instead.
+					if(empty($return['id'])){
 						$value = 0;
 					}
 					else{
