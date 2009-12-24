@@ -7,15 +7,15 @@
 						 'version' => '1.13',
 						 'release-date' => '2009-10-26',
 						 'author' => array('name' => 'Symphony Team',
-										   'website' => 'http://www.symphony21.com',
-										   'email' => 'team@symphony21.com')
+										   'website' => 'http://www.symphony-cms.com',
+										   'email' => 'team@symphony-cms.com')
 				 		);
 		}
-		
+
 		public function uninstall(){
 			Symphony::Database()->query("DROP TABLE `tbl_fields_selectbox_link`");
 		}
-		
+
 		public function update($previousVersion){
 			if(version_compare($previousVersion, '1.6', '<')){
 				Symphony::Database()->query("ALTER TABLE `tbl_fields_selectbox_link` ADD `limit` INT(4) UNSIGNED NOT NULL DEFAULT '20'");
