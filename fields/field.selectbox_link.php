@@ -242,47 +242,51 @@
 
 			$values = array();
 			$limit = $this->get('limit');
+			
+			$related = $this->get('related_field_id');
+			
+			if(is_array($related) && !empty($related)){
+				foreach($this->get('related_field_id') as $field_id){
+				
+					$section = $this->Database->fetchRow(0, "SELECT s.name, s.id
+						 									FROM `tbl_sections` AS `s` 
+															LEFT JOIN `tbl_fields` AS `f` ON `s`.id = `f`.parent_section
+															WHERE `f`.id = '{$field_id}'
+															LIMIT 1");
+				
+					$group = array('name' => $section['name'], 'section' => $section['id'], 'values' => array());
+				
+					$sql = "SELECT DISTINCT `entry_id` 
+							FROM `tbl_entries_data_{$field_id}`
+							ORDER BY `entry_id` DESC
+							LIMIT 0, {$limit}";
 
-			foreach($this->get('related_field_id') as $field_id){
-				
-				$section = $this->Database->fetchRow(0, "SELECT s.name, s.id
-					 									FROM `tbl_sections` AS `s` 
-														LEFT JOIN `tbl_fields` AS `f` ON `s`.id = `f`.parent_section
-														WHERE `f`.id = '{$field_id}'
-														LIMIT 1");
-				
-				$group = array('name' => $section['name'], 'section' => $section['id'], 'values' => array());
-				
-				$sql = "SELECT DISTINCT `entry_id` 
-						FROM `tbl_entries_data_{$field_id}`
-						ORDER BY `entry_id` DESC
-						LIMIT 0, {$limit}";
-
-				$results = $this->Database->fetchCol('entry_id', $sql);
+					$results = $this->Database->fetchCol('entry_id', $sql);
 	
-				if(!is_null($existing_selection) && !empty($existing_selection)){
-					foreach($existing_selection as $key => $entry_id){
-						$x = $this->findFieldIDFromRelationID($entry_id);
+					if(!is_null($existing_selection) && !empty($existing_selection)){
+						foreach($existing_selection as $key => $entry_id){
+							$x = $this->findFieldIDFromRelationID($entry_id);
 
-						if($x == $field_id){
-							$results[] = $entry_id;
-							//unset($existing_selection[$key]);
+							if($x == $field_id){
+								$results[] = $entry_id;
+								//unset($existing_selection[$key]);
+							}
 						}
 					}
-				}
 	
-				rsort($results);
+					rsort($results);
 	
-				if(is_array($results) && !empty($results)){
-					foreach($results as $entry_id){
-						$value = $this->__findPrimaryFieldValueFromRelationID($entry_id);
-						$group['values'][$entry_id] = $value['value'];
+					if(is_array($results) && !empty($results)){
+						foreach($results as $entry_id){
+							$value = $this->__findPrimaryFieldValueFromRelationID($entry_id);
+							$group['values'][$entry_id] = $value['value'];
+						}
 					}
+
+					$values[] = $group;
 				}
-
-				$values[] = $group;
 			}
-
+			
 			return $values;
 
 		}		
