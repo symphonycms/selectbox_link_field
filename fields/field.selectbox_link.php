@@ -208,15 +208,24 @@
 		}
 		
 		public function findFieldIDFromRelationID($id){
-			## Figure out the section
-			$section_id = $this->Database->fetchVar('section_id', 0, "SELECT `section_id` FROM `tbl_entries` WHERE `id` = {$id} LIMIT 1");
+			
+			if(is_null($id)) return NULL;
+			
+			try{
+				## Figure out the section
+				$section_id = $this->Database->fetchVar('section_id', 0, "SELECT `section_id` FROM `tbl_entries` WHERE `id` = '{$id}' LIMIT 1");
 
-			## Figure out which related_field_id is from that section
-			$field_id = $this->Database->fetchVar('field_id', 0, "SELECT f.`id` AS `field_id`
-				FROM `tbl_fields` AS `f` 
-				LEFT JOIN `tbl_sections` AS `s` ON f.parent_section = s.id
-				WHERE `s`.id = {$section_id} AND f.id IN ('".@implode("', '", $this->get('related_field_id'))."') LIMIT 1");
 
+				## Figure out which related_field_id is from that section
+				$field_id = $this->Database->fetchVar('field_id', 0, "SELECT f.`id` AS `field_id`
+					FROM `tbl_fields` AS `f` 
+					LEFT JOIN `tbl_sections` AS `s` ON f.parent_section = s.id
+					WHERE `s`.id = {$section_id} AND f.id IN ('".@implode("', '", $this->get('related_field_id'))."') LIMIT 1");
+			}
+			catch(Exception $e){
+				return NULL;
+			}
+			
 			return $field_id;
 		}
 
@@ -271,15 +280,20 @@
 		}		
 
 		public function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
-			if(!is_array($data['relation_id'])){
-				$entry_ids = array($data['relation_id']);
-			}
-			else{
-				$entry_ids = array_values($data['relation_id']);
-			}
 
+			$entry_ids = array();
+			
+			if(!is_null($data['relation_id'])){
+				if(!is_array($data['relation_id'])){
+					$entry_ids = array($data['relation_id']);
+				}
+				else{
+					$entry_ids = array_values($data['relation_id']);
+				}
+
+			}
+			
 			$states = $this->findOptions($entry_ids);
-
 			$options = array();
 
 			if($this->get('required') != 'yes') $options[] = array(NULL, false, NULL);

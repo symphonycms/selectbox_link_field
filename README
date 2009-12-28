@@ -1,9 +1,9 @@
 Select Box Link Field
 ------------------------------------
 
-Version: 1.13
+Version: 1.14
 Author: Symphony Team (team@symphony-cms.com)
-Build Date: 26th Oct 2009
+Build Date: 29th Dec 2009
 Requirements: Symphony 2.0
 
 
@@ -35,6 +35,9 @@ the publish form.
 
 
 [CHANGE LOG]
+1.14	- Made install and update functions more tolerant of existing tables
+		- Minor bug fixes for 2.0.7
+		
 1.13	- Added filtering by handle functionality (CreativeDutchmen)
 
 1.12	- Fixed a couple of issues where 'related_field_id' was returning the wrong type. (rowan)
