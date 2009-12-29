@@ -22,7 +22,7 @@
 		public function getToggleStates(){
 			$options = $this->findOptions();
 			$output = $options[0]['values'];
-			$output[""] = "None";
+			$output[""] = __('None');
 			return $output;
 		}
 		
