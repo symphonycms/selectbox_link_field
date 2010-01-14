@@ -458,7 +458,7 @@
 				"CREATE TABLE IF NOT EXISTS `tbl_entries_data_" . $this->get('id') . "` (
 				`id` int(11) unsigned NOT NULL auto_increment,
 				`entry_id` int(11) unsigned NOT NULL,
-				`relation_id` int(11) unsigned NOT NULL,
+				`relation_id` int(11) unsigned DEFAULT NULL,
 				PRIMARY KEY	 (`id`),
 				KEY `entry_id` (`entry_id`),
 				KEY `relation_id` (`relation_id`)
