@@ -1,10 +1,10 @@
 Select Box Link Field
 ------------------------------------
 
-Version: 1.14
+Version: 1.15
 Author: Symphony Team (team@symphony-cms.com)
-Build Date: 29th Dec 2009
-Requirements: Symphony 2.0
+Build Date: 14th January 2010
+Requirements: Symphony 2.0.5 or greater
 
 
 [INSTALLATION]
@@ -35,6 +35,8 @@ the publish form.
 
 
 [CHANGE LOG]
+1.15	- 'relation_id' can now be a NULL value. Fixes issue #1 (http://symphony-cms.com/download/extensions/issues/view/20054/1/)
+
 1.14	- Made install and update functions more tolerant of existing tables
 		- Minor bug fixes for 2.0.7
 		
