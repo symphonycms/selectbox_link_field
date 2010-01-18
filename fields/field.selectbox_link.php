@@ -10,7 +10,7 @@
 			$this->_required = true;
 
 			// Set default
-			$this->set('show_column', 'no'); 
+			$this->set('show_column', 'no');
 			$this->set('required', 'yes');
 			$this->set('limit', 20);
 		}
@@ -18,14 +18,14 @@
 		public function canToggle(){
 			return ($this->get('allow_multiple_selection') == 'yes' ? false : true);
 		}
-		
+
 		public function getToggleStates(){
 			$options = $this->findOptions();
 			$output = $options[0]['values'];
 			$output[""] = "None";
 			return $output;
 		}
-		
+
 		public function toggleFieldData($data, $new_value){
 			$data['relation_id'] = $new_value;
 			return $data;
@@ -38,14 +38,14 @@
 		public function allowDatasourceOutputGrouping(){
 			return true;
 		}
-		
+
 		public function allowDatasourceParamOutput(){
 			return true;
 		}
 
 		public function getParameterPoolValue($data){
 			return $data['relation_id'];
-		}		
+		}
 
 		public function set($field, $value){
 			if($field == 'related_field_id' && !is_array($value)){
@@ -53,11 +53,11 @@
 			}
 			$this->_fields[$field] = $value;
 		}
-		
+
 		public function setArray($array){
 			if(empty($array) || !is_array($array)) return;
 			foreach($array as $field => $value) $this->set($field, $value);
-		}		
+		}
 
 		public function groupRecords($records){
 			if(!is_array($records) || empty($records)) return;
@@ -72,12 +72,12 @@
 				if(!isset($groups[$this->get('element_name')][$value])){
 					$groups[$this->get('element_name')][$value] = array(
 						'attr' => array(
-							'link-id' => $data['relation_id'], 
+							'link-id' => $data['relation_id'],
 							'link-handle' => Lang::createHandle($primary_field['value'])),
 						'records' => array(),
 						'groups' => array()
-					);	
-				}	
+					);
+				}
 
 				$groups[$this->get('element_name')][$value]['records'][] = $r;
 			}
@@ -87,13 +87,13 @@
 
 		public function prepareTableValue($data, XMLElement $link=NULL){
 			$result = array();
-			
+
 			if(!is_array($data) || (is_array($data) && !isset($data['relation_id']))) return parent::prepareTableValue(NULL);
-			
+
 			if(!is_array($data['relation_id'])){
 				$data['relation_id'] = array($data['relation_id']);
 			}
-	
+
 			foreach($data['relation_id'] as $relation_id){
 				if((int)$relation_id <= 0) continue;
 
@@ -131,7 +131,7 @@
 				 FROM `tbl_fields` AS `f`
 				 INNER JOIN `tbl_sections` AS `s` ON `s`.id = `f`.parent_section
 				 WHERE `f`.id = '{$field_id}'
-				 ORDER BY `f`.sortorder ASC 
+				 ORDER BY `f`.sortorder ASC
 				 LIMIT 1"
 			);
 
@@ -139,14 +139,14 @@
 
 			$field = $this->_Parent->create($primary_field['type']);
 
-			$data = $this->Database->fetchRow(0, 
+			$data = $this->Database->fetchRow(0,
 				"SELECT *
 				 FROM `tbl_entries_data_{$field_id}`
 				 WHERE `entry_id` = '{$entry_id}' ORDER BY `id` DESC LIMIT 1"
 			);
 
 			if(empty($data)) return NULL;
-			$primary_field['value'] = $field->prepareTableValue($data); 
+			$primary_field['value'] = $field->prepareTableValue($data);
 			return $primary_field;
 		}
 
@@ -158,10 +158,10 @@
 
 			$result = array();
 
-			foreach($data as $a => $value) { 
+			foreach($data as $a => $value) {
 			  $result['relation_id'][] = $data[$a];
 			}
-	
+
 			return $result;
 		}
 
@@ -171,10 +171,10 @@
 
 			if(!is_array($data)) return $data;
 
-			$searchvalue = $this->_engine->Database->fetchRow(0, 
+			$searchvalue = $this->_engine->Database->fetchRow(0,
 				sprintf("
-					SELECT `entry_id` FROM `tbl_entries_data_%d` 
-					WHERE `handle` = '%s' 
+					SELECT `entry_id` FROM `tbl_entries_data_%d`
+					WHERE `handle` = '%s'
 					LIMIT 1", $field_id, addslashes($data['handle']))
 			);
 
@@ -187,7 +187,7 @@
 
 		public function fetchAssociatedEntryIDs($value){
 			return $this->_engine->Database->fetchCol('entry_id', "SELECT `entry_id` FROM `tbl_entries_data_".$this->get('id')."` WHERE `relation_id` = '$value'");
-		}		
+		}
 
 		public function appendFormattedElement(&$wrapper, $data, $encode=false){
 			if(!is_array($data) || empty($data)) return;
@@ -197,7 +197,7 @@
 			if(!is_array($data['relation_id'])) $data['relation_id'] = array($data['relation_id']);
 
 			foreach($data['relation_id'] as $value){
-				$primary_field = $this->__findPrimaryFieldValueFromRelationID($value);	  
+				$primary_field = $this->__findPrimaryFieldValueFromRelationID($value);
 				$section = $this->_engine->Database->fetchRow(0, "SELECT `id`, `handle` FROM `tbl_sections` WHERE `id` = '".$primary_field['parent_section']."' LIMIT 1");
 				$item_handle = Lang::createHandle($primary_field['value']);
 
@@ -206,11 +206,11 @@
 
 			$wrapper->appendChild($list);
 		}
-		
+
 		public function findFieldIDFromRelationID($id){
-			
+
 			if(is_null($id)) return NULL;
-			
+
 			try{
 				## Figure out the section
 				$section_id = $this->Database->fetchVar('section_id', 0, "SELECT `section_id` FROM `tbl_entries` WHERE `id` = '{$id}' LIMIT 1");
@@ -218,14 +218,14 @@
 
 				## Figure out which related_field_id is from that section
 				$field_id = $this->Database->fetchVar('field_id', 0, "SELECT f.`id` AS `field_id`
-					FROM `tbl_fields` AS `f` 
+					FROM `tbl_fields` AS `f`
 					LEFT JOIN `tbl_sections` AS `s` ON f.parent_section = s.id
 					WHERE `s`.id = {$section_id} AND f.id IN ('".@implode("', '", $this->get('related_field_id'))."') LIMIT 1");
 			}
 			catch(Exception $e){
 				return NULL;
 			}
-			
+
 			return $field_id;
 		}
 
@@ -238,14 +238,14 @@
 			if(is_array($related) && !empty($related)){
 				foreach($this->get('related_field_id') as $field_id){
 					$section = $this->Database->fetchRow(0, "SELECT s.name, s.id
-															FROM `tbl_sections` AS `s` 
+															FROM `tbl_sections` AS `s`
 															LEFT JOIN `tbl_fields` AS `f` ON `s`.id = `f`.parent_section
 															WHERE `f`.id = '{$field_id}'
 															LIMIT 1");
 
 					$group = array('name' => $section['name'], 'section' => $section['id'], 'values' => array());
 
-					$sql = "SELECT DISTINCT `entry_id` 
+					$sql = "SELECT DISTINCT `entry_id`
 							FROM `tbl_entries_data_{$field_id}`
 							ORDER BY `entry_id` DESC
 							LIMIT 0, {$limit}";
@@ -277,12 +277,12 @@
 			}
 
 			return $values;
-		}		
+		}
 
 		public function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
 
 			$entry_ids = array();
-			
+
 			if(!is_null($data['relation_id'])){
 				if(!is_array($data['relation_id'])){
 					$entry_ids = array($data['relation_id']);
@@ -292,7 +292,7 @@
 				}
 
 			}
-			
+
 			$states = $this->findOptions($entry_ids);
 			$options = array();
 
@@ -315,7 +315,7 @@
 			$label->appendChild(Widget::Select($fieldname, $options, ($this->get('allow_multiple_selection') == 'yes' ? array('multiple' => 'multiple') : NULL)));
 
 			if($flagWithError != NULL) $wrapper->appendChild(Widget::wrapFormElementWithError($label, $flagWithError));
-			else $wrapper->appendChild($label); 
+			else $wrapper->appendChild($label);
 		}
 
 		public function commit(){
@@ -341,7 +341,7 @@
 			$this->removeSectionAssociation($id);
 
 			//$section_id = $this->Database->fetchVar('parent_section', 0, "SELECT `parent_section` FROM `tbl_fields` WHERE `id` = '".$fields['related_field_id']."' LIMIT 1");
-			
+
 			foreach($this->get('related_field_id') as $field_id){
 				$this->createSectionAssociation(NULL, $id, $field_id);
 			}
@@ -356,41 +356,64 @@
 
 		public function buildDSRetrivalSQL($data, &$joins, &$where, $andOperation=false){
 			$field_id = $this->get('id');
-			
-			foreach($data as $key => &$value){
-			
-				// for now, I assume string values are the only possible handles.
-				// ofcourse, this is not entirely true, but I find it good enough.
-				if(!is_numeric($value)){
-					// numeric returned false, so the value is in fact a handle, not an id.
 
-					// replace the handle with it's id, for processing in the database.
-					// I wanted to do this in one query, but since the result from the first becomes a table of the second, this is not possible..
-					$return = Frontend::instance()->Database->fetchCol("related_field_id","select related_field_id from `tbl_fields_selectbox_link` where field_id='$field_id' LIMIT 1");
+			if(preg_match('/^sql:\s*/', $data[0], $matches)) {
+				$data = trim(array_pop(explode(':', $data[0], 2)));
 
-					if(is_array($return) && !empty($return)) {
-						$return = Frontend::instance()->Database->fetchCol("id","select entry_id as id from `tbl_entries_data_{$return['related_field_id']}` where handle='$value' LIMIT 1");
+				if(strpos($data, "NOT NULL") !== false) {
 
-						// Skipping returns wrong results when doing an AND operation, return 0 instead.
-						if(empty($return['id'])){
-							$value = 0;
-						} else {
-							$value = $return['id'];
+					$joins .= " LEFT JOIN
+									`tbl_entries_data_{$field_id}` AS `t{$field_id}`
+								ON (`e`.`id` = `t{$field_id}`.entry_id)";
+					$where .= " AND `t{$field_id}`.relation_id IS NOT NULL ";
+
+				} else if(strpos($data, "NULL") !== false) {
+
+					$joins .= " LEFT JOIN
+									`tbl_entries_data_{$field_id}` AS `t{$field_id}`
+								ON (`e`.`id` = `t{$field_id}`.entry_id)";
+					$where .= " AND `t{$field_id}`.relation_id IS NULL ";
+
+				}
+
+			} else {
+
+				foreach($data as $key => &$value) {
+
+					// for now, I assume string values are the only possible handles.
+					// ofcourse, this is not entirely true, but I find it good enough.
+					if(!is_numeric($value)){
+						// numeric returned false, so the value is in fact a handle, not an id.
+
+						// replace the handle with it's id, for processing in the database.
+						// I wanted to do this in one query, but since the result from the first becomes a table of the second, this is not possible..
+						$return = Frontend::instance()->Database->fetchCol("related_field_id","select related_field_id from `tbl_fields_selectbox_link` where field_id='$field_id' LIMIT 1");
+
+						if(is_array($return) && !empty($return)) {
+							$return = Frontend::instance()->Database->fetchCol("id","select entry_id as id from `tbl_entries_data_{$return['related_field_id']}` where handle='$value' LIMIT 1");
+
+							// Skipping returns wrong results when doing an AND operation, return 0 instead.
+							if(empty($return['id'])){
+								$value = 0;
+							} else {
+								$value = $return['id'];
+							}
 						}
+
 					}
-
 				}
+
+				if($andOperation):
+					foreach($data as $key => $bit){
+						$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id$key` ON (`e`.`id` = `t$field_id$key`.entry_id) ";
+						$where .= " AND `t$field_id$key`.relation_id = '$bit' ";
+					}
+				else:
+					$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id` ON (`e`.`id` = `t$field_id`.entry_id) ";
+					$where .= " AND `t$field_id`.relation_id IN ('".@implode("', '", $data)."') ";
+				endif;
+
 			}
-
-			if($andOperation):
-				foreach($data as $key => $bit){
-					$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id$key` ON (`e`.`id` = `t$field_id$key`.entry_id) ";
-					$where .= " AND `t$field_id$key`.relation_id = '$bit' ";
-				}
-			else:
-				$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id` ON (`e`.`id` = `t$field_id`.entry_id) ";
-				$where .= " AND `t$field_id`.relation_id IN ('".@implode("', '", $data)."') ";
-			endif;
 
 			return true;
 		}
@@ -399,7 +422,7 @@
 			if(!isset($fields['allow_multiple_selection'])) $fields['allow_multiple_selection'] = 'no';
 		}
 
-		public function displaySettingsPanel(&$wrapper, $errors=NULL){		
+		public function displaySettingsPanel(&$wrapper, $errors=NULL){
 			parent::displaySettingsPanel($wrapper, $errors);
 
 			$div = new XMLElement('div', NULL, array('class' => 'group'));
@@ -442,12 +465,12 @@
 			$input->setAttribute('size', '3');
 			$label->setValue(__('Limit to the %s most recent entries', array($input->generate())));
 			$wrapper->appendChild($label);
-			
+
 			## Allow selection of multiple items
 			$label = Widget::Label();
 			$input = Widget::Input('fields['.$this->get('sortorder').'][allow_multiple_selection]', 'yes', 'checkbox');
 
-			if($this->get('allow_multiple_selection') == 'yes') $input->setAttribute('checked', 'checked');			
+			if($this->get('allow_multiple_selection') == 'yes') $input->setAttribute('checked', 'checked');
 
 			$label->setValue($input->generate() . ' ' . __('Allow selection of multiple options'));
 			$wrapper->appendChild($label);
@@ -471,6 +494,6 @@
 
 		public function getExampleFormMarkup(){
 			return Widget::Input('fields['.$this->get('element_name').']', '...', 'hidden');
-		}			
+		}
 
 	}
