@@ -379,24 +379,28 @@
 			} else {
 
 				foreach($data as $key => &$value) {
-
 					// for now, I assume string values are the only possible handles.
 					// ofcourse, this is not entirely true, but I find it good enough.
 					if(!is_numeric($value)){
-						// numeric returned false, so the value is in fact a handle, not an id.
 
-						// replace the handle with it's id, for processing in the database.
-						// I wanted to do this in one query, but since the result from the first becomes a table of the second, this is not possible..
-						$return = Frontend::instance()->Database->fetchCol("related_field_id","select related_field_id from `tbl_fields_selectbox_link` where field_id='$field_id' LIMIT 1");
+						$related_field_id = $this->get('related_field_id');
 
-						if(is_array($return) && !empty($return)) {
-							$return = Frontend::instance()->Database->fetchCol("id","select entry_id as id from `tbl_entries_data_{$return['related_field_id']}` where handle='$value' LIMIT 1");
+						if(is_array($related_field_id) && !empty($related_field_id)) {
+							$return = Frontend::instance()->Database->fetchCol("id",sprintf("
+									SELECT
+										entry_id as id
+									FROM
+										`tbl_entries_data_%d`
+									WHERE
+										handle = '%s'
+									LIMIT 1", $related_field_id[0], Lang::createHandle($value))
+							);
 
 							// Skipping returns wrong results when doing an AND operation, return 0 instead.
-							if(empty($return['id'])){
+							if(empty($return)){
 								$value = 0;
 							} else {
-								$value = $return['id'];
+								$value = $return[0];
 							}
 						}
 
