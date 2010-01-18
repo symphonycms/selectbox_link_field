@@ -366,16 +366,19 @@
 
 					// replace the handle with it's id, for processing in the database.
 					// I wanted to do this in one query, but since the result from the first becomes a table of the second, this is not possible..
-					$return = Frontend::instance()->Database->fetchRow(0,"select related_field_id from `tbl_fields_selectbox_link` where field_id='$field_id' LIMIT 1");
-					$return = Frontend::instance()->Database->fetchRow(0,"select entry_id as id from `tbl_entries_data_{$return['related_field_id']}` where handle='$value' LIMIT 1");
+					$return = Frontend::instance()->Database->fetchCol("related_field_id","select related_field_id from `tbl_fields_selectbox_link` where field_id='$field_id' LIMIT 1");
 
-					// Skipping returns wrong results when doing an AND operation, return 0 instead.
-					if(empty($return['id'])){
-						$value = 0;
+					if(is_array($return) && !empty($return)) {
+						$return = Frontend::instance()->Database->fetchCol("id","select entry_id as id from `tbl_entries_data_{$return['related_field_id']}` where handle='$value' LIMIT 1");
+
+						// Skipping returns wrong results when doing an AND operation, return 0 instead.
+						if(empty($return['id'])){
+							$value = 0;
+						} else {
+							$value = $return['id'];
+						}
 					}
-					else{
-						$value = $return[id];
-					}
+
 				}
 			}
 
