@@ -1,9 +1,9 @@
 Select Box Link Field
 ------------------------------------
 
-Version: 1.15
+Version: 1.16
 Author: Symphony Team (team@symphony-cms.com)
-Build Date: 14th January 2010
+Build Date: 25th January 2010
 Requirements: Symphony 2.0.5 or greater
 
 
@@ -35,6 +35,11 @@ the publish form.
 
 
 [CHANGE LOG]
+
+1.16	- Fixed sort order of entries in select box. Corrected to use the column sort
+    	  order. A bug in 1.13+ caused this particular issue to reappear. This fix is based on code 
+    	  by Nick Dunn initially introduced in 1.12.
+
 1.15	- 'relation_id' can now be a NULL value. Fixes issue #1 (http://symphony-cms.com/download/extensions/issues/view/20054/1/)
 
 1.14	- Made install and update functions more tolerant of existing tables
