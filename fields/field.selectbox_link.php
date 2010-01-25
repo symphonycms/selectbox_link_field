@@ -232,38 +232,33 @@
 		public function findOptions(array $existing_selection=NULL){
 			$values = array();
 			$limit = $this->get('limit');
+			
+			// find the sections of the related fields
+			$sections = $this->Database->fetch("SELECT DISTINCT (s.id), s.name, f.id as `field_id`
+				 								FROM `tbl_sections` AS `s` 
+												LEFT JOIN `tbl_fields` AS `f` ON `s`.id = `f`.parent_section
+												WHERE `f`.id IN ('" . implode("','", $this->get('related_field_id')) . "')
+												ORDER BY s.sortorder ASC");
 
-			$related = $this->get('related_field_id');
-
-			if(is_array($related) && !empty($related)){
-				foreach($this->get('related_field_id') as $field_id){
-					$section = $this->Database->fetchRow(0, "SELECT s.name, s.id
-															FROM `tbl_sections` AS `s` 
-															LEFT JOIN `tbl_fields` AS `f` ON `s`.id = `f`.parent_section
-															WHERE `f`.id = '{$field_id}'
-															LIMIT 1");
+			if(is_array($sections) && !empty($sections)){
+				foreach($sections as $section){
 
 					$group = array('name' => $section['name'], 'section' => $section['id'], 'values' => array());
 
-					$sql = "SELECT DISTINCT `entry_id` 
-							FROM `tbl_entries_data_{$field_id}`
-							ORDER BY `entry_id` DESC
-							LIMIT 0, {$limit}";
+					// build a list of entry IDs with the correct sort order
+					$entryManager = new EntryManager($this->_Parent->_Parent);
+					$entries = $entryManager->fetch(NULL, $section['id'], $limit, 0);
 
-					$results = $this->Database->fetchCol('entry_id', $sql);
+					$results = array();
+					foreach($entries as $entry) $results[] = $entry->get('id');
 
+					// if a value is already selected, ensure it is added to the list (if it isn't in the available options)
 					if(!is_null($existing_selection) && !empty($existing_selection)){
 						foreach($existing_selection as $key => $entry_id){
 							$x = $this->findFieldIDFromRelationID($entry_id);
-
-							if($x == $field_id){
-								$results[] = $entry_id;
-								// unset($existing_selection[$key]);
-							}
+							if($x == $section['field_id']) $results[] = $entry_id;
 						}
 					}
-
-					rsort($results);
 
 					if(is_array($results) && !empty($results)){
 						foreach($results as $entry_id){
