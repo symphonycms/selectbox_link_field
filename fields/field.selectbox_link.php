@@ -190,7 +190,7 @@
 		}
 
 		public function appendFormattedElement(&$wrapper, $data, $encode=false){
-			if(!is_array($data) || empty($data)) return;
+			if(!is_array($data) || empty($data) || is_null($data['relation_id'])) return;
 
 			$list = new XMLElement($this->get('element_name'));
 
@@ -377,7 +377,6 @@
 				}
 
 			} else {
-
 				foreach($data as $key => &$value) {
 					// for now, I assume string values are the only possible handles.
 					// ofcourse, this is not entirely true, but I find it good enough.
