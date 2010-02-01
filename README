@@ -1,9 +1,9 @@
 Select Box Link Field
 ------------------------------------
 
-Version: 1.16
+Version: 1.17
 Author: Symphony Team (team@symphony-cms.com)
-Build Date: 25th January 2010
+Build Date: 2nd Feb 2010
 Requirements: Symphony 2.0.5 or greater
 
 
@@ -35,6 +35,9 @@ the publish form.
 
 
 [CHANGE LOG]
+
+1.17 	- Added missing translation strings
+		- Added localisation files for Dutch, German, Portuguese (Brazil) and Russian
 
 1.16	- Fixed sort order of entries in select box. Corrected to use the column sort
     	  order. A bug in 1.13+ caused this particular issue to reappear. This fix is based on code 
