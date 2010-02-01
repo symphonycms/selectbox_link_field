@@ -1,7 +1,7 @@
 Select Box Link Field
 ------------------------------------
 
-Version: 1.17
+Version: 1.18
 Author: Symphony Team (team@symphony-cms.com)
 Build Date: 2nd Feb 2010
 Requirements: Symphony 2.0.5 or greater
@@ -35,6 +35,8 @@ the publish form.
 
 
 [CHANGE LOG]
+
+1.18	- Prevent NULL Relations from appearing in the Output XML
 
 1.17 	- Added missing translation strings
 		- Added localisation files for Dutch, German, Portuguese (Brazil) and Russian
