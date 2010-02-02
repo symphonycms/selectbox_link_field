@@ -22,7 +22,7 @@
 		'Select Box Link',
 		
 		'None' =>
-		'Keine'
+		'Keine',
 
 		'Options' => 
 		'Optionen',
