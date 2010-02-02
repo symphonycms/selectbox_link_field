@@ -4,10 +4,10 @@
 		'name' => 'Portuguese (Brazil)',
 		'author' => array(
 			'name' => 'Rainer Borene',
-			'email' => 'rainerborene@gmail.com',
+			'email' => 'eu@rainerborene.com',
 			'website' => false
 		),
-		'release-date' => '2009-10-08'
+		'release-date' => '2010-02-01'
 	);
 
 
@@ -17,21 +17,21 @@
 	 */
 
 	$dictionary = array(
-	
+
 		'Select Box Link' => 
-		false,
-		
+		'Select Box Link',
+
 		'None' =>
-		false,
+		'Nenhum',
 
 		'Options' => 
-		false,
+		'Opções',
 
 		'Limit to the %s most recent entries' => 
-		false,
+		'Limitar para as %s recentes entradas',
 
 		'Allow selection of multiple options' => 
-		false
+		'Permitir seleção de múltiplas opções'
 
 	);
 	
