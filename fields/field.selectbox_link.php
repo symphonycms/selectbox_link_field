@@ -198,10 +198,13 @@
 
 			foreach($data['relation_id'] as $value){
 				$primary_field = $this->__findPrimaryFieldValueFromRelationID($value);
-				$section = $this->_engine->Database->fetchRow(0, "SELECT `id`, `handle` FROM `tbl_sections` WHERE `id` = '".$primary_field['parent_section']."' LIMIT 1");
-				$item_handle = Lang::createHandle($primary_field['value']);
 
-				$list->appendChild(new XMLElement('item', ($encode ? General::sanitize($value) : $primary_field['value']), array('handle' => $item_handle, 'id' => $value)));
+				$item_handle = Lang::createHandle($primary_field['value']);
+				$item_value = $primary_field['value'];
+
+				if($encode) $item_value = General::sanitize($item_value);
+
+				$list->appendChild(new XMLElement('item', $item_value, array('handle' => $item_handle, 'id' => $value)));
 			}
 
 			$wrapper->appendChild($list);
