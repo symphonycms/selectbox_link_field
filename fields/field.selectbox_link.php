@@ -196,15 +196,36 @@
 
 			if(!is_array($data['relation_id'])) $data['relation_id'] = array($data['relation_id']);
 
-			foreach($data['relation_id'] as $value){
-				$primary_field = $this->__findPrimaryFieldValueFromRelationID($value);
+			foreach($data['relation_id'] as $relation_id){
+				$primary_field = $this->__findPrimaryFieldValueFromRelationID($relation_id);
 
-				$item_handle = Lang::createHandle($primary_field['value']);
-				$item_value = $primary_field['value'];
+				$value = $primary_field['value'];
+				if($encode) $value = General::sanitize($value);
 
-				if($encode) $item_value = General::sanitize($item_value);
+				$section = $this->Database->fetchRow(0, sprintf(
+					"
+						SELECT
+							s.name, s.handle
+						FROM
+							`tbl_sections` AS s
+						WHERE
+							s.id = %d
+						LIMIT 1
+					",
+					$primary_field['parent_section']
+				));
 
-				$list->appendChild(new XMLElement('item', $item_value, array('handle' => $item_handle, 'id' => $value)));
+				$item = new XMLElement('item');
+				$item->setAttribute('id', $relation_id);
+				$item->setAttribute('handle', Lang::createHandle($primary_field['value']));
+				$item->setValue($value);
+
+				if (isset($section['name']) and isset($section['handle'])) {
+					$item->setAttribute('section-handle', $section['handle']);
+					$item->setAttribute('section-name', General::sanitize($section['name']));
+				}
+
+				$list->appendChild($item);
 			}
 
 			$wrapper->appendChild($list);
