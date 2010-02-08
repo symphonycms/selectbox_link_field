@@ -3,6 +3,9 @@
 	if(!defined('__IN_SYMPHONY__')) die('<h2>Symphony Error</h2><p>You cannot directly access this file</p>');
 
 	Class fieldSelectBox_Link extends Field{
+		static private $cacheRelations = array();
+		static private $cacheFields = array();
+		static private $cacheValues = array();
 
 		public function __construct(&$parent){
 			parent::__construct($parent);
@@ -125,28 +128,46 @@
 
 		private function __findPrimaryFieldValueFromRelationID($entry_id){
 			$field_id = $this->findFieldIDFromRelationID($entry_id);
-
-			$primary_field = $this->Database->fetchRow(0,
-				"SELECT `f`.*, `s`.handle AS `section_handle`
-				 FROM `tbl_fields` AS `f`
-				 INNER JOIN `tbl_sections` AS `s` ON `s`.id = `f`.parent_section
-				 WHERE `f`.id = '{$field_id}'
-				 ORDER BY `f`.sortorder ASC
-				 LIMIT 1"
-			);
-
+			
+			if (!isset(self::$cacheFields[$field_id])) {
+				self::$cacheFields[$field_id] = $this->Database->fetchRow(0, "
+					SELECT
+						f.id, f.type,
+						s.name AS `section_name`,
+						s.handle AS `section_handle`
+					 FROM
+					 	`tbl_fields` AS f
+					 INNER JOIN
+					 	`tbl_sections` AS s
+					 	ON s.id = f.parent_section
+					 WHERE
+					 	f.id = '{$field_id}'
+					 ORDER BY
+					 	f.sortorder ASC
+					 LIMIT 1
+				");
+			}
+			
+			$primary_field = self::$cacheFields[$field_id];
+			
 			if(!$primary_field) return NULL;
 
 			$field = $this->_Parent->create($primary_field['type']);
-
-			$data = $this->Database->fetchRow(0,
-				"SELECT *
-				 FROM `tbl_entries_data_{$field_id}`
-				 WHERE `entry_id` = '{$entry_id}' ORDER BY `id` DESC LIMIT 1"
-			);
-
-			if(empty($data)) return NULL;
+			
+			if (!isset(self::$cacheValues[$entry_id])) {
+				self::$cacheValues[$entry_id] = $this->Database->fetchRow(0,
+					"SELECT *
+					 FROM `tbl_entries_data_{$field_id}`
+					 WHERE `entry_id` = '{$entry_id}' ORDER BY `id` DESC LIMIT 1"
+				);
+			}
+			
+			$data = self::$cacheValues[$entry_id];
+			
+			if(empty($data)) return null;
+			
 			$primary_field['value'] = $field->prepareTableValue($data);
+			
 			return $primary_field;
 		}
 
@@ -198,42 +219,31 @@
 
 			foreach($data['relation_id'] as $relation_id){
 				$primary_field = $this->__findPrimaryFieldValueFromRelationID($relation_id);
-
+				
 				$value = $primary_field['value'];
-				if($encode) $value = General::sanitize($value);
-
-				$section = $this->Database->fetchRow(0, sprintf(
-					"
-						SELECT
-							s.name, s.handle
-						FROM
-							`tbl_sections` AS s
-						WHERE
-							s.id = %d
-						LIMIT 1
-					",
-					$primary_field['parent_section']
-				));
-
+				if ($encode) $value = General::sanitize($value);
+				
 				$item = new XMLElement('item');
 				$item->setAttribute('id', $relation_id);
 				$item->setAttribute('handle', Lang::createHandle($primary_field['value']));
+				$item->setAttribute('section-handle', $primary_field['section_handle']);
+				$item->setAttribute('section-name', General::sanitize($primary_field['section_name']));
 				$item->setValue($value);
-
-				if (isset($section['name']) and isset($section['handle'])) {
-					$item->setAttribute('section-handle', $section['handle']);
-					$item->setAttribute('section-name', General::sanitize($section['name']));
-				}
 
 				$list->appendChild($item);
 			}
 
 			$wrapper->appendChild($list);
 		}
-
+		
+		
+		
 		public function findFieldIDFromRelationID($id){
-
 			if(is_null($id)) return NULL;
+			
+			if (isset(self::$cacheRelations[$id])) {
+				return self::$cacheRelations[$id];
+			}
 
 			try{
 				## Figure out the section
@@ -249,7 +259,9 @@
 			catch(Exception $e){
 				return NULL;
 			}
-
+			
+			self::$cacheRelations[$id] = $field_id;
+			
 			return $field_id;
 		}
 
