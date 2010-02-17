@@ -333,7 +333,7 @@
 				foreach($states as $s){
 					$group = array('label' => $s['name'], 'options' => array());
 					foreach($s['values'] as $id => $v){
-						$group['options'][] = array($id, in_array($id, $entry_ids), $v);
+						$group['options'][] = array($id, in_array($id, $entry_ids), General::sanitize($v));
 					}
 					$options[] = $group;
 				}
