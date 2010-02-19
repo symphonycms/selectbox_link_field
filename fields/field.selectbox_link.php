@@ -228,7 +228,7 @@
 				$item->setAttribute('handle', Lang::createHandle($primary_field['value']));
 				$item->setAttribute('section-handle', $primary_field['section_handle']);
 				$item->setAttribute('section-name', General::sanitize($primary_field['section_name']));
-				$item->setValue($value);
+				$item->setValue(General::sanitize($value));
 
 				$list->appendChild($item);
 			}
