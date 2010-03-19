@@ -1,10 +1,10 @@
 Select Box Link Field
 ------------------------------------
 
-Version: 1.12
-Author: Symphony Team (team@symphony21.com)
-Build Date: 26th Oct 2009
-Requirements: Symphony 2.0
+Version: 1.18
+Author: Symphony Team (team@symphony-cms.com)
+Build Date: 2nd Feb 2010
+Requirements: Symphony 2.0.5 or greater
 
 
 [INSTALLATION]
@@ -35,6 +35,22 @@ the publish form.
 
 
 [CHANGE LOG]
+
+1.18	- Prevent NULL Relations from appearing in the Output XML
+
+1.17 	- Added missing translation strings
+		- Added localisation files for Dutch, German, Portuguese (Brazil) and Russian
+
+1.16	- Fixed sort order of entries in select box. Corrected to use the column sort
+    	  order. A bug in 1.13+ caused this particular issue to reappear. This fix is based on code 
+    	  by Nick Dunn initially introduced in 1.12.
+
+1.15	- 'relation_id' can now be a NULL value. Fixes issue #1 (http://symphony-cms.com/download/extensions/issues/view/20054/1/)
+
+1.14	- Made install and update functions more tolerant of existing tables
+		- Minor bug fixes for 2.0.7
+		
+1.13	- Added filtering by handle functionality (CreativeDutchmen)
 
 1.12	- Fixed a couple of issues where 'related_field_id' was returning the wrong type. (rowan)
 		- In dropdown options, sort Sections by their Symphony order and sort Entries by their Symphony order (using EntryManager) (Nick Dunn)
