@@ -7,8 +7,8 @@
 		static private $cacheFields = array();
 		static private $cacheValues = array();
 
-		public function __construct(&$parent){
-			parent::__construct($parent);
+		public function __construct(){
+			parent::__construct();
 			$this->_name = __('Select Box Link');
 			$this->_required = true;
 
@@ -130,7 +130,7 @@
 			$field_id = $this->findFieldIDFromRelationID($entry_id);
 			
 			if (!isset(self::$cacheFields[$field_id])) {
-				self::$cacheFields[$field_id] = $this->Database->fetchRow(0, "
+				self::$cacheFields[$field_id] = Symphony::Database()->fetchRow(0, "
 					SELECT
 						f.id, f.type,
 						s.name AS `section_name`,
@@ -152,10 +152,10 @@
 			
 			if(!$primary_field) return NULL;
 
-			$field = $this->_Parent->create($primary_field['type']);
+			$field = FieldManager::instance()->create($primary_field['type']);
 			
 			if (!isset(self::$cacheValues[$entry_id])) {
-				self::$cacheValues[$entry_id] = $this->Database->fetchRow(0,
+				self::$cacheValues[$entry_id] = Symphony::Database()->fetchRow(0,
 					"SELECT *
 					 FROM `tbl_entries_data_{$field_id}`
 					 WHERE `entry_id` = '{$entry_id}' ORDER BY `id` DESC LIMIT 1"
@@ -192,7 +192,7 @@
 
 			if(!is_array($data)) return $data;
 
-			$searchvalue = $this->_engine->Database->fetchRow(0,
+			$searchvalue = Symphony::Database()->fetchRow(0,
 				sprintf("
 					SELECT `entry_id` FROM `tbl_entries_data_%d`
 					WHERE `handle` = '%s'
@@ -203,11 +203,11 @@
 		}
 
 		public function fetchAssociatedEntryCount($value){
-			return $this->_engine->Database->fetchVar('count', 0, "SELECT count(*) AS `count` FROM `tbl_entries_data_".$this->get('id')."` WHERE `relation_id` = '$value'");
+			return Symphony::Database()->fetchVar('count', 0, "SELECT count(*) AS `count` FROM `tbl_entries_data_".$this->get('id')."` WHERE `relation_id` = '$value'");
 		}
 
 		public function fetchAssociatedEntryIDs($value){
-			return $this->_engine->Database->fetchCol('entry_id', "SELECT `entry_id` FROM `tbl_entries_data_".$this->get('id')."` WHERE `relation_id` = '$value'");
+			return Symphony::Database()->fetchCol('entry_id', "SELECT `entry_id` FROM `tbl_entries_data_".$this->get('id')."` WHERE `relation_id` = '$value'");
 		}
 
 		public function appendFormattedElement(&$wrapper, $data, $encode=false){
@@ -247,11 +247,11 @@
 
 			try{
 				## Figure out the section
-				$section_id = $this->Database->fetchVar('section_id', 0, "SELECT `section_id` FROM `tbl_entries` WHERE `id` = '{$id}' LIMIT 1");
+				$section_id = Symphony::Database()->fetchVar('section_id', 0, "SELECT `section_id` FROM `tbl_entries` WHERE `id` = '{$id}' LIMIT 1");
 
 
 				## Figure out which related_field_id is from that section
-				$field_id = $this->Database->fetchVar('field_id', 0, "SELECT f.`id` AS `field_id`
+				$field_id = Symphony::Database()->fetchVar('field_id', 0, "SELECT f.`id` AS `field_id`
 					FROM `tbl_fields` AS `f`
 					LEFT JOIN `tbl_sections` AS `s` ON f.parent_section = s.id
 					WHERE `s`.id = {$section_id} AND f.id IN ('".@implode("', '", $this->get('related_field_id'))."') LIMIT 1");
@@ -270,7 +270,7 @@
 			$limit = $this->get('limit');
 			
 			// find the sections of the related fields
-			$sections = $this->Database->fetch("SELECT DISTINCT (s.id), s.name, f.id as `field_id`
+			$sections = Symphony::Database()->fetch("SELECT DISTINCT (s.id), s.name, f.id as `field_id`
 				 								FROM `tbl_sections` AS `s` 
 												LEFT JOIN `tbl_fields` AS `f` ON `s`.id = `f`.parent_section
 												WHERE `f`.id IN ('" . implode("','", $this->get('related_field_id')) . "')
@@ -282,8 +282,7 @@
 					$group = array('name' => $section['name'], 'section' => $section['id'], 'values' => array());
 
 					// build a list of entry IDs with the correct sort order
-					$entryManager = new EntryManager($this->_Parent->_Parent);
-					$entries = $entryManager->fetch(NULL, $section['id'], $limit, 0);
+					$entries = EntryManager::instance()->fetch(NULL, $section['id'], $limit, 0);
 
 					$results = array();
 					foreach($entries as $entry) $results[] = $entry->get('id');
@@ -363,15 +362,15 @@
 			$fields['limit'] = max(1, (int)$this->get('limit'));
 			$fields['related_field_id'] = implode(',', $this->get('related_field_id'));
 
-			$this->Database->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id'");
+			Symphony::Database()->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id'");
 
-			if(!$this->Database->insert($fields, 'tbl_fields_' . $this->handle())) return false;
+			if(!Symphony::Database()->insert($fields, 'tbl_fields_' . $this->handle())) return false;
 
 			//$sections = $this->get('related_field_id');
 
 			$this->removeSectionAssociation($id);
 
-			//$section_id = $this->Database->fetchVar('parent_section', 0, "SELECT `parent_section` FROM `tbl_fields` WHERE `id` = '".$fields['related_field_id']."' LIMIT 1");
+			//$section_id = Symphony::Database()->fetchVar('parent_section', 0, "SELECT `parent_section` FROM `tbl_fields` WHERE `id` = '".$fields['related_field_id']."' LIMIT 1");
 
 			foreach($this->get('related_field_id') as $field_id){
 				$this->createSectionAssociation(NULL, $id, $field_id);
@@ -464,16 +463,17 @@
 
 			$div = new XMLElement('div', NULL, array('class' => 'group'));
 			$label = Widget::Label(__('Options'));
-
-			$sectionManager = new SectionManager($this->_engine);
-			$sections = $sectionManager->fetch(NULL, 'ASC', 'sortorder');
+			
+			$options = array();
+			
+			// TODO: Fix me
+/*			$sections = SectionManager::instance()->fetch(NULL, 'ASC', 'sortorder');
 			$field_groups = array();
 
 			if(is_array($sections) && !empty($sections)){
 				foreach($sections as $section) $field_groups[$section->get('id')] = array('fields' => $section->fetchFields(), 'section' => $section);
 			}
 
-			$options = array();
 
 			foreach($field_groups as $group){
 				if(!is_array($group['fields'])) continue;
@@ -488,7 +488,7 @@
 
 				if(is_array($fields) && !empty($fields)) $options[] = array('label' => $group['section']->get('name'), 'options' => $fields);
 			}
-
+*/
 			$label->appendChild(Widget::Select('fields['.$this->get('sortorder').'][related_field_id][]', $options, array('multiple' => 'multiple')));
 
 			$div->appendChild($label);
@@ -517,7 +517,7 @@
 		}
 
 		public function createTable(){
-			return $this->_engine->Database->query(
+			return Symphony::Database()->query(
 				"CREATE TABLE IF NOT EXISTS `tbl_entries_data_" . $this->get('id') . "` (
 				`id` int(11) unsigned NOT NULL auto_increment,
 				`entry_id` int(11) unsigned NOT NULL,
