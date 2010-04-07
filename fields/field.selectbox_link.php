@@ -461,7 +461,7 @@
 		public function displaySettingsPanel(&$wrapper, $errors=NULL){
 			parent::displaySettingsPanel($wrapper, $errors);
 
-			$div = new XMLElement('div', NULL, array('class' => 'group'));
+
 			$label = Widget::Label(__('Options'));
 			
 			$options = array();
@@ -489,31 +489,36 @@
 				if(is_array($fields) && !empty($fields)) $options[] = array('label' => $group['section']->get('name'), 'options' => $fields);
 			}
 */
-			$label->appendChild(Widget::Select('fields['.$this->get('sortorder').'][related_field_id][]', $options, array('multiple' => 'multiple')));
+			$label->appendChild(Widget::Select('related_field_id][', $options, array('multiple' => 'multiple')));
 
-			$div->appendChild($label);
 
-			if(isset($errors['related_field_id'])) $wrapper->appendChild(Widget::wrapFormElementWithError($div, $errors['related_field_id']));
-			else $wrapper->appendChild($div);
+			if(isset($errors['related_field_id'])) $wrapper->appendChild(Widget::wrapFormElementWithError($label, $errors['related_field_id']));
+			else $wrapper->appendChild($label);
 
 			## Maximum entries
 			$label = Widget::Label();
-			$input = Widget::Input('fields['.$this->get('sortorder').'][limit]', $this->get('limit'));
+			$input = Widget::Input('limit', $this->get('limit'));
 			$input->setAttribute('size', '3');
 			$label->setValue(__('Limit to the %s most recent entries', array($input->generate())));
 			$wrapper->appendChild($label);
 
+
+			
+			$options_list = new XMLElement('ul');
+			$options_list->setAttribute('class', 'options-list');
+			
 			## Allow selection of multiple items
 			$label = Widget::Label();
-			$input = Widget::Input('fields['.$this->get('sortorder').'][allow_multiple_selection]', 'yes', 'checkbox');
+			$input = Widget::Input('allow_multiple_selection', 'yes', 'checkbox');
 
 			if($this->get('allow_multiple_selection') == 'yes') $input->setAttribute('checked', 'checked');
 
 			$label->setValue($input->generate() . ' ' . __('Allow selection of multiple options'));
-			$wrapper->appendChild($label);
-
-			$this->appendShowColumnCheckbox($wrapper);
-			$this->appendRequiredCheckbox($wrapper);
+			$options_list->appendChild($label);
+			
+			$this->appendShowColumnCheckbox($options_list);
+			$this->appendRequiredCheckbox($options_list);
+			$wrapper->appendChild($options_list);
 		}
 
 		public function createTable(){
