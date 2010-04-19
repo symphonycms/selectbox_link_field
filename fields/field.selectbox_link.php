@@ -152,7 +152,7 @@
 			
 			if(!$primary_field) return NULL;
 
-			$field = FieldManager::instance()->create($primary_field['type']);
+			$field = Field::loadFromType($primary_field['type']);
 			
 			if (!isset(self::$cacheValues[$entry_id])) {
 				self::$cacheValues[$entry_id] = Symphony::Database()->fetchRow(0,
@@ -172,7 +172,7 @@
 		}
 
 		public function processRawFieldData($data, &$status, $simulate=false, $entry_id=NULL){
-			$status = self::__OK__;
+			$status = self::STATUS_OK;
 			if(!is_array($data)) return array('relation_id' => $data);
 
 			if(empty($data)) return NULL;
@@ -309,7 +309,7 @@
 			return $values;
 		}
 
-		public function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL){
+		public function displayPublishPanel(DOMElement $wrapper, $data=NULL, $flagWithError=NULL, $entry_id=NULL){
 
 			$entry_ids = array();
 
@@ -499,12 +499,15 @@
 			$label = Widget::Label();
 			$input = Widget::Input('limit', $this->get('limit'));
 			$input->setAttribute('size', '3');
-			$label->setValue(__('Limit to the %s most recent entries', array($input->generate())));
+			
+			$label->appendChild(new DOMText(__('Limit to the ')));
+			$label->appendChild($input);
+			$label->appendChild(new DOMText(__(' most recent entries')));
+
 			$wrapper->appendChild($label);
 
 
-			
-			$options_list = new XMLElement('ul');
+			$options_list = $wrapper->ownerDocument->createElement('ul');
 			$options_list->setAttribute('class', 'options-list');
 			
 			## Allow selection of multiple items
@@ -513,7 +516,9 @@
 
 			if($this->get('allow_multiple_selection') == 'yes') $input->setAttribute('checked', 'checked');
 
-			$label->setValue($input->generate() . ' ' . __('Allow selection of multiple options'));
+			$label->appendChild($input);
+			$label->appendChild(new DOMText(__('Allow selection of multiple options')));
+			
 			$options_list->appendChild($label);
 			
 			$this->appendShowColumnCheckbox($options_list);
@@ -539,3 +544,5 @@
 		}
 
 	}
+	
+	return 'fieldSelectBox_Link';
