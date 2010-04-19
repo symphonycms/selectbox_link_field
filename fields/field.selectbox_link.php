@@ -309,7 +309,7 @@
 			return $values;
 		}
 
-		public function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
+		public function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL){
 
 			$entry_ids = array();
 
@@ -338,7 +338,7 @@
 				}
 			}
 
-			$fieldname = 'fields'.$fieldnamePrefix.'['.$this->get('element_name').']'.$fieldnamePostfix;
+			$fieldname = 'fields['.$this->get('element_name').']';
 			if($this->get('allow_multiple_selection') == 'yes') $fieldname .= '[]';
 
 			$label = Widget::Label($this->get('label'));
