@@ -16,6 +16,7 @@
 			$this->set('show_column', 'no');
 			$this->set('required', 'yes');
 			$this->set('limit', 20);
+			$this->set('related_field_id', array());
 		}
 
 		public function canToggle(){
@@ -171,6 +172,17 @@
 			return $primary_field;
 		}
 
+		public function checkFields(&$errors, $checkForDuplicates = true) {
+			parent::checkFields($errors, $checkForDuplicates);
+			
+			$related_fields = $this->get('related_field_id');
+			if(empty($related_fields)){
+				$errors['related_field_id'] = __('This is a required field.');
+			}
+			
+			return (is_array($errors) && !empty($errors) ? self::__ERROR__ : self::__OK__);
+		}	
+			
 		public function processRawFieldData($data, &$status, $simulate=false, $entry_id=NULL){
 			$status = self::__OK__;
 			if(!is_array($data)) return array('relation_id' => $data);
