@@ -231,7 +231,7 @@
 
 			foreach($data['relation_id'] as $relation_id){
 				$primary_field = $this->__findPrimaryFieldValueFromRelationID($relation_id);
-
+				
 				$value = $primary_field['value'];
 				if ($encode) $value = General::sanitize($value);
 
@@ -248,10 +248,12 @@
 			$wrapper->appendChild($list);
 		}
 
-
-
 		public function findFieldIDFromRelationID($id){
 			if(is_null($id)) return NULL;
+			
+			if (isset(self::$cacheRelations[$id])) {
+				return self::$cacheRelations[$id];
+			}
 
 			if (isset(self::$cacheRelations[$id])) {
 				return self::$cacheRelations[$id];
