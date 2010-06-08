@@ -133,7 +133,7 @@
 			if (!isset(self::$cacheFields[$field_id])) {
 				self::$cacheFields[$field_id] = $this->Database->fetchRow(0, "
 					SELECT
-						f.id, f.type,
+						f.id,
 						s.name AS `section_name`,
 						s.handle AS `section_handle`
 					 FROM
@@ -153,14 +153,17 @@
 
 			if(!$primary_field) return NULL;
 
-			$field = $this->_Parent->create($primary_field['type']);
+			$fm = new FieldManager($this->_Parent);
+			$field = $fm->fetch($field_id);
 
 			if (!isset(self::$cacheValues[$entry_id])) {
-				self::$cacheValues[$entry_id] = $this->Database->fetchRow(0,
-					"SELECT *
-					 FROM `tbl_entries_data_{$field_id}`
-					 WHERE `entry_id` = '{$entry_id}' ORDER BY `id` DESC LIMIT 1"
-				);
+				self::$cacheValues[$entry_id] = $this->Database->fetchRow(0, sprintf("
+						SELECT *
+				 		FROM `tbl_entries_data_%d`
+				 		WHERE `entry_id` = %d
+						ORDER BY `id` DESC
+						LIMIT 1
+				", $field_id, $entry_id));
 			}
 
 			$data = self::$cacheValues[$entry_id];
@@ -231,7 +234,7 @@
 
 			foreach($data['relation_id'] as $relation_id){
 				$primary_field = $this->__findPrimaryFieldValueFromRelationID($relation_id);
-				
+
 				$value = $primary_field['value'];
 				if ($encode) $value = General::sanitize($value);
 
@@ -240,7 +243,7 @@
 				$item->setAttribute('handle', Lang::createHandle($primary_field['value']));
 				$item->setAttribute('section-handle', $primary_field['section_handle']);
 				$item->setAttribute('section-name', General::sanitize($primary_field['section_name']));
-				$item->setValue(General::sanitize($value));
+				$item->setValue($value);
 
 				$list->appendChild($item);
 			}
@@ -250,10 +253,6 @@
 
 		public function findFieldIDFromRelationID($id){
 			if(is_null($id)) return NULL;
-			
-			if (isset(self::$cacheRelations[$id])) {
-				return self::$cacheRelations[$id];
-			}
 
 			if (isset(self::$cacheRelations[$id])) {
 				return self::$cacheRelations[$id];
@@ -261,8 +260,7 @@
 
 			try{
 				## Figure out the section
-				$section_id = $this->Database->fetchVar('section_id', 0, "SELECT `section_id` FROM `tbl_entries` WHERE `id` = '{$id}' LIMIT 1");
-
+				$section_id = $this->Database->fetchVar('section_id', 0, "SELECT `section_id` FROM `tbl_entries` WHERE `id` = {$id} LIMIT 1");
 
 				## Figure out which related_field_id is from that section
 				$field_id = $this->Database->fetchVar('field_id', 0, "SELECT f.`id` AS `field_id`
