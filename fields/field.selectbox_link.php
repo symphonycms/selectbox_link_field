@@ -129,11 +129,11 @@
 
 		private function __findPrimaryFieldValueFromRelationID($entry_id){
 			$field_id = $this->findFieldIDFromRelationID($entry_id);
-			
+
 			if (!isset(self::$cacheFields[$field_id])) {
 				self::$cacheFields[$field_id] = $this->Database->fetchRow(0, "
 					SELECT
-						f.id, f.type,
+						f.id,
 						s.name AS `section_name`,
 						s.handle AS `section_handle`
 					 FROM
@@ -148,41 +148,44 @@
 					 LIMIT 1
 				");
 			}
-			
+
 			$primary_field = self::$cacheFields[$field_id];
-			
+
 			if(!$primary_field) return NULL;
 
-			$field = $this->_Parent->create($primary_field['type']);
-			
+			$fm = new FieldManager($this->_Parent);
+			$field = $fm->fetch($field_id);
+
 			if (!isset(self::$cacheValues[$entry_id])) {
-				self::$cacheValues[$entry_id] = $this->Database->fetchRow(0,
-					"SELECT *
-					 FROM `tbl_entries_data_{$field_id}`
-					 WHERE `entry_id` = '{$entry_id}' ORDER BY `id` DESC LIMIT 1"
-				);
+				self::$cacheValues[$entry_id] = $this->Database->fetchRow(0, sprintf("
+						SELECT *
+				 		FROM `tbl_entries_data_%d`
+				 		WHERE `entry_id` = %d
+						ORDER BY `id` DESC
+						LIMIT 1
+				", $field_id, $entry_id));
 			}
-			
+
 			$data = self::$cacheValues[$entry_id];
-			
+
 			if(empty($data)) return null;
-			
+
 			$primary_field['value'] = $field->prepareTableValue($data);
-			
+
 			return $primary_field;
 		}
 
 		public function checkFields(&$errors, $checkForDuplicates = true) {
 			parent::checkFields($errors, $checkForDuplicates);
-			
+
 			$related_fields = $this->get('related_field_id');
 			if(empty($related_fields)){
 				$errors['related_field_id'] = __('This is a required field.');
 			}
-			
+
 			return (is_array($errors) && !empty($errors) ? self::__ERROR__ : self::__OK__);
-		}	
-			
+		}
+
 		public function processRawFieldData($data, &$status, $simulate=false, $entry_id=NULL){
 			$status = self::__OK__;
 			if(!is_array($data)) return array('relation_id' => $data);
@@ -231,10 +234,9 @@
 
 			foreach($data['relation_id'] as $relation_id){
 				$primary_field = $this->__findPrimaryFieldValueFromRelationID($relation_id);
-				
+
 				$value = $primary_field['value'];
-				if ($encode) $value = General::sanitize($value);
-				
+
 				$item = new XMLElement('item');
 				$item->setAttribute('id', $relation_id);
 				$item->setAttribute('handle', Lang::createHandle($primary_field['value']));
@@ -247,20 +249,17 @@
 
 			$wrapper->appendChild($list);
 		}
-		
-		
-		
+
 		public function findFieldIDFromRelationID($id){
 			if(is_null($id)) return NULL;
-			
+
 			if (isset(self::$cacheRelations[$id])) {
 				return self::$cacheRelations[$id];
 			}
 
 			try{
 				## Figure out the section
-				$section_id = $this->Database->fetchVar('section_id', 0, "SELECT `section_id` FROM `tbl_entries` WHERE `id` = '{$id}' LIMIT 1");
-
+				$section_id = $this->Database->fetchVar('section_id', 0, "SELECT `section_id` FROM `tbl_entries` WHERE `id` = {$id} LIMIT 1");
 
 				## Figure out which related_field_id is from that section
 				$field_id = $this->Database->fetchVar('field_id', 0, "SELECT f.`id` AS `field_id`
@@ -271,19 +270,19 @@
 			catch(Exception $e){
 				return NULL;
 			}
-			
+
 			self::$cacheRelations[$id] = $field_id;
-			
+
 			return $field_id;
 		}
 
 		public function findOptions(array $existing_selection=NULL){
 			$values = array();
 			$limit = $this->get('limit');
-			
+
 			// find the sections of the related fields
 			$sections = $this->Database->fetch("SELECT DISTINCT (s.id), s.name, f.id as `field_id`
-				 								FROM `tbl_sections` AS `s` 
+				 								FROM `tbl_sections` AS `s`
 												LEFT JOIN `tbl_fields` AS `f` ON `s`.id = `f`.parent_section
 												WHERE `f`.id IN ('" . implode("','", $this->get('related_field_id')) . "')
 												ORDER BY s.sortorder ASC");
@@ -418,17 +417,16 @@
 					$where .= " AND `t{$field_id}`.relation_id IS NULL ";
 
 				}
-			} 
-			
-			else{
+			}
+			else {
 				foreach($data as $key => &$value) {
 					// for now, I assume string values are the only possible handles.
 					// of course, this is not entirely true, but I find it good enough.
-					if(!is_numeric($value)){
+					if(!is_numeric($value) && !is_null($value)){
+						$related_field_ids = $this->get('related_field_id');
+						$id = null;
 
-						$related_field_id = $this->get('related_field_id');
-
-						if(is_array($related_field_id) && !empty($related_field_id)) {
+						foreach($related_field_ids as $related_field_id) {
 							$return = Symphony::Database()->fetchCol("id", sprintf(
 								"SELECT
 									`entry_id` as `id`
@@ -436,19 +434,17 @@
 									`tbl_entries_data_%d`
 								WHERE
 									`handle` = '%s'
-								LIMIT 1", $related_field_id[0], Lang::createHandle($value)
+								LIMIT 1", $related_field_id, Lang::createHandle($value)
 							));
 
 							// Skipping returns wrong results when doing an AND operation, return 0 instead.
-							if(empty($return)){
-								$value = 0;
-							}
-							
-							else{
-								$value = $return[0];
+							if(!empty($return)) {
+								$id = $return[0];
+								break;
 							}
 						}
 
+						$value = (is_null($id)) ? 0 : $id;
 					}
 				}
 
