@@ -13,7 +13,12 @@
 		}
 
 		public function uninstall(){
-			Symphony::Database()->query("DROP TABLE `tbl_fields_selectbox_link`");
+			if(parent::uninstall() == true){
+				Symphony::Database()->query("DROP TABLE `tbl_fields_selectbox_link`");
+				return true;
+			}
+			
+			return false;
 		}
 
 		public function update($previousVersion){
