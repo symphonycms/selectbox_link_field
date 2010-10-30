@@ -419,6 +419,12 @@
 				}
 			}
 			else {
+				$negation = false;
+				if(preg_match('/^not:/', $data[0])) {
+					$data[0] = preg_replace('/^not:/', null, $data[0]);
+					$negation = true;
+				}
+
 				foreach($data as $key => &$value) {
 					// for now, I assume string values are the only possible handles.
 					// of course, this is not entirely true, but I find it good enough.
@@ -448,15 +454,18 @@
 					}
 				}
 
-				if($andOperation):
+				if($andOperation) {
+					$condition = ($negation) ? '!=' : '=';
 					foreach($data as $key => $bit){
 						$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id$key` ON (`e`.`id` = `t$field_id$key`.entry_id) ";
-						$where .= " AND `t$field_id$key`.relation_id = '$bit' ";
+						$where .= " AND `t$field_id$key`.relation_id $condition '$bit' ";
 					}
-				else:
+				}
+				else {
+					$condition = ($negation) ? 'NOT IN' : 'IN';
 					$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id` ON (`e`.`id` = `t$field_id`.entry_id) ";
-					$where .= " AND `t$field_id`.relation_id IN ('".@implode("', '", $data)."') ";
-				endif;
+					$where .= " AND `t$field_id`.relation_id $condition ('".implode("', '", $data)."') ";
+				}
 
 			}
 
