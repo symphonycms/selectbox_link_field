@@ -1,9 +1,9 @@
 Select Box Link Field
 ------------------------------------
 
-Version: 1.18
+Version: 1.19
 Author: Symphony Team (team@symphony-cms.com)
-Build Date: 2nd Feb 2010
+Build Date: 1st Nov 2010
 Requirements: Symphony 2.0.5 or greater
 
 
@@ -35,6 +35,8 @@ the publish form.
 
 
 [CHANGE LOG]
+
+1.19	- Allow the linked section's public column's visibility to be toggled
 
 1.18	- Prevent NULL Relations from appearing in the Output XML
 

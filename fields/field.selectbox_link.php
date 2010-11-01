@@ -11,10 +11,11 @@
 			parent::__construct($parent);
 			$this->_name = __('Select Box Link');
 			$this->_required = true;
+			$this->_showassociation = true;
 
 			// Set default
 			$this->set('show_column', 'no');
-			$this->set('show_association_column', 'yes');
+			$this->set('show_association', 'yes');
 			$this->set('required', 'yes');
 			$this->set('limit', 20);
 			$this->set('related_field_id', array());
@@ -371,7 +372,7 @@
 			$fields['field_id'] = $id;
 			if($this->get('related_field_id') != '') $fields['related_field_id'] = $this->get('related_field_id');
 			$fields['allow_multiple_selection'] = $this->get('allow_multiple_selection') ? $this->get('allow_multiple_selection') : 'no';
-			$fields['show_association_column'] = $this->get('show_association_column') == 'yes' ? 'yes' : 'no';
+			$fields['show_association'] = $this->get('show_association') == 'yes' ? 'yes' : 'no';
 			$fields['limit'] = max(1, (int)$this->get('limit'));
 			$fields['related_field_id'] = implode(',', $this->get('related_field_id'));
 
@@ -386,7 +387,7 @@
 			//$section_id = $this->Database->fetchVar('parent_section', 0, "SELECT `parent_section` FROM `tbl_fields` WHERE `id` = '".$fields['related_field_id']."' LIMIT 1");
 
 			foreach($this->get('related_field_id') as $field_id){
-				$this->createSectionAssociation(NULL, $id, $field_id, $this->get('show_association_column') == 'yes' ? true : false);
+				$this->createSectionAssociation(NULL, $id, $field_id, $this->get('show_association') == 'yes' ? true : false);
 			}
 
 			return true;
@@ -475,7 +476,7 @@
 
 		public function findDefaults(&$fields){
 			if(!isset($fields['allow_multiple_selection'])) $fields['allow_multiple_selection'] = 'no';
-			if(!isset($fields['show_association_column'])) $fields['show_association_column'] = 'yes';
+			if(!isset($fields['show_association'])) $fields['show_association'] = 'yes';
 		}
 
 		public function displaySettingsPanel(&$wrapper, $errors=NULL){
