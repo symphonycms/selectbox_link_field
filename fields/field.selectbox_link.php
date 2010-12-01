@@ -78,7 +78,7 @@
 						'attr' => array(
 							'link-id' => $data['relation_id'],
 							'link-handle' => Lang::createHandle($primary_field['value']),
-							'value' => $primary_field['value']),
+							'value' => General::sanitize($primary_field['value'])),
 						'records' => array(),
 						'groups' => array()
 					);
