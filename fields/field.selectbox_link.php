@@ -77,7 +77,8 @@
 					$groups[$this->get('element_name')][$value] = array(
 						'attr' => array(
 							'link-id' => $data['relation_id'],
-							'link-handle' => Lang::createHandle($primary_field['value'])),
+							'link-handle' => Lang::createHandle($primary_field['value']),
+							'value' => $primary_field['value']),
 						'records' => array(),
 						'groups' => array()
 					);
