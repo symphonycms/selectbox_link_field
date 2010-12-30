@@ -512,10 +512,10 @@
 
 			$label->appendChild(Widget::Select('fields['.$this->get('sortorder').'][related_field_id][]', $options, array('multiple' => 'multiple')));
 
-			$div->appendChild($label);
+			if(isset($errors['related_field_id'])) $div->appendChild(Widget::wrapFormElementWithError($label, $errors['related_field_id']));
+			else $div->appendChild($label);
 
-			if(isset($errors['related_field_id'])) $wrapper->appendChild(Widget::wrapFormElementWithError($div, $errors['related_field_id']));
-			else $wrapper->appendChild($div);
+			$wrapper->appendChild($div);
 
 			## Maximum entries
 			$label = Widget::Label();
