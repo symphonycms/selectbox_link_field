@@ -534,8 +534,8 @@
 			$wrapper->appendChild($label);
 
 			$this->appendShowAssociationCheckbox($wrapper);
-			$this->appendShowColumnCheckbox($wrapper);
 			$this->appendRequiredCheckbox($wrapper);
+			$this->appendShowColumnCheckbox($wrapper);
 		}
 
 		public function createTable(){
