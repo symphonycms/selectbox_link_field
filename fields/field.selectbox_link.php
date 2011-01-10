@@ -436,20 +436,25 @@
 						$id = null;
 
 						foreach($related_field_ids as $related_field_id) {
-							$return = Symphony::Database()->fetchCol("id", sprintf(
-								"SELECT
-									`entry_id` as `id`
-								FROM
-									`tbl_entries_data_%d`
-								WHERE
-									`handle` = '%s'
-								LIMIT 1", $related_field_id, Lang::createHandle($value)
-							));
+							try {
+								$return = Symphony::Database()->fetchCol("id", sprintf(
+									"SELECT
+										`entry_id` as `id`
+									FROM
+										`tbl_entries_data_%d`
+									WHERE
+										`handle` = '%s'
+									LIMIT 1", $related_field_id, Lang::createHandle($value)
+								));
 
-							// Skipping returns wrong results when doing an AND operation, return 0 instead.
-							if(!empty($return)) {
-								$id = $return[0];
-								break;
+								// Skipping returns wrong results when doing an AND operation, return 0 instead.
+								if(!empty($return)) {
+									$id = $return[0];
+									break;
+								}
+							} catch (Exception $ex) {
+								// Do nothing, this would normally be the case when a handle
+								// column doesn't exist!
 							}
 						}
 

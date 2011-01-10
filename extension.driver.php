@@ -5,7 +5,7 @@
 		public function about(){
 			return array(
 				'name' => 'Field: Select Box Link',
-				'version' => '1.2',
+				'version' => '1.19',
 				'release-date' => '2011-01-02',
 				'author' => array(
 					'name' => 'Symphony Team',
