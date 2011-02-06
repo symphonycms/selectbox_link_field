@@ -488,8 +488,7 @@
 		public function displaySettingsPanel(&$wrapper, $errors=NULL){
 			parent::displaySettingsPanel($wrapper, $errors);
 
-			$div = new XMLElement('div', NULL, array('class' => 'group'));
-			$label = Widget::Label(__('Options'));
+			$label = Widget::Label(__('Values'));
 
 			$sectionManager = new SectionManager($this->_engine);
 			$sections = $sectionManager->fetch(NULL, 'ASC', 'sortorder');
@@ -517,10 +516,8 @@
 
 			$label->appendChild(Widget::Select('fields['.$this->get('sortorder').'][related_field_id][]', $options, array('multiple' => 'multiple')));
 
-			if(isset($errors['related_field_id'])) $div->appendChild(Widget::wrapFormElementWithError($label, $errors['related_field_id']));
-			else $div->appendChild($label);
-
-			$wrapper->appendChild($div);
+			if(isset($errors['related_field_id'])) $wrapper->appendChild(Widget::wrapFormElementWithError($label, $errors['related_field_id']));
+			else $wrapper->appendChild($label);
 
 			## Maximum entries
 			$label = Widget::Label();
@@ -532,15 +529,15 @@
 			## Allow selection of multiple items
 			$label = Widget::Label();
 			$input = Widget::Input('fields['.$this->get('sortorder').'][allow_multiple_selection]', 'yes', 'checkbox');
-
 			if($this->get('allow_multiple_selection') == 'yes') $input->setAttribute('checked', 'checked');
-
 			$label->setValue($input->generate() . ' ' . __('Allow selection of multiple options'));
-			$wrapper->appendChild($label);
 
-			$this->appendShowAssociationCheckbox($wrapper);
-			$this->appendRequiredCheckbox($wrapper);
-			$this->appendShowColumnCheckbox($wrapper);
+			$div = new XMLElement('div', NULL, array('class' => 'compact'));
+			$div->appendChild($label);
+			$this->appendShowAssociationCheckbox($div);
+			$this->appendRequiredCheckbox($div);
+			$this->appendShowColumnCheckbox($div);
+			$wrapper->appendChild($div);
 		}
 
 		public function createTable(){
