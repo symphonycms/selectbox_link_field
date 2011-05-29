@@ -133,8 +133,8 @@
 		private function __findPrimaryFieldValueFromRelationID($entry_id){
 			$field_id = $this->findFieldIDFromRelationID($entry_id);
 
-			if (!isset(self::$cacheFields[$field_id])) {
-				self::$cacheFields[$field_id] = $this->_engine->Database->fetchRow(0, "
+			if (!isset(self::$cacheFields[$this->get('id').'_'.$entry_id.'_'.$field_id])) {
+				self::$cacheFields[$this->get('id').'_'.$entry_id.'_'.$field_id] = $this->_engine->Database->fetchRow(0, "
 					SELECT
 						f.id,
 						s.name AS `section_name`,
@@ -152,15 +152,15 @@
 				");
 			}
 
-			$primary_field = self::$cacheFields[$field_id];
+			$primary_field = self::$cacheFields[$this->get('id').'_'.$entry_id.'_'.$field_id];
 
 			if(!$primary_field) return NULL;
 
 			$fm = new FieldManager($this->_Parent);
 			$field = $fm->fetch($field_id);
 
-			if (!isset(self::$cacheValues[$entry_id])) {
-				self::$cacheValues[$entry_id] = $this->_engine->Database->fetchRow(0, sprintf("
+			if (!isset(self::$cacheValues[$this->get('id').'_'.$entry_id.'_'.$field_id])) {
+				self::$cacheValues[$this->get('id').'_'.$entry_id.'_'.$field_id] = $this->_engine->Database->fetchRow(0, sprintf("
 						SELECT *
 				 		FROM `tbl_entries_data_%d`
 				 		WHERE `entry_id` = %d
@@ -169,7 +169,7 @@
 				", $field_id, $entry_id));
 			}
 
-			$data = self::$cacheValues[$entry_id];
+			$data = self::$cacheValues[$this->get('id').'_'.$entry_id.'_'.$field_id];
 
 			if(empty($data)) return null;
 
@@ -256,8 +256,8 @@
 		public function findFieldIDFromRelationID($id){
 			if(is_null($id)) return NULL;
 
-			if (isset(self::$cacheRelations[$id])) {
-				return self::$cacheRelations[$id];
+			if (isset(self::$cacheRelations[$this->get('id').'_'.$id])) {
+				return self::$cacheRelations[$this->get('id').'_'.$id];
 			}
 
 			try{
@@ -274,7 +274,7 @@
 				return NULL;
 			}
 
-			self::$cacheRelations[$id] = $field_id;
+			self::$cacheRelations[$this->get('id').'_'.$id] = $field_id;
 
 			return $field_id;
 		}
