@@ -73,7 +73,7 @@
 			foreach($records as $r){
 				$data = $r->getData($this->get('id'));
 				$value = $data['relation_id'];
-				$primary_field = $this->__findPrimaryFieldValueFromRelationID($data['relation_id']);
+				$primary_field = $this->findPrimaryFieldValueFromRelationID($data['relation_id']);
 
 				if(!isset($groups[$this->get('element_name')][$value])){
 					$groups[$this->get('element_name')][$value] = array(
@@ -104,7 +104,7 @@
 			foreach($data['relation_id'] as $relation_id){
 				if((int)$relation_id <= 0) continue;
 
-				$primary_field = $this->__findPrimaryFieldValueFromRelationID($relation_id);
+				$primary_field = $this->findPrimaryFieldValueFromRelationID($relation_id);
 
 				if(!is_array($primary_field) || empty($primary_field)) continue;
 
@@ -130,11 +130,11 @@
 			return trim($output);
 		}
 
-		private function __findPrimaryFieldValueFromRelationID($entry_id){
+		protected function findPrimaryFieldValueFromRelationID($entry_id){
 			$field_id = $this->findFieldIDFromRelationID($entry_id);
 
 			if (!isset(self::$cacheFields[$this->get('id').'_'.$entry_id.'_'.$field_id])) {
-				self::$cacheFields[$this->get('id').'_'.$entry_id.'_'.$field_id] = $this->_engine->Database->fetchRow(0, "
+				self::$cacheFields[$this->get('id').'_'.$entry_id.'_'.$field_id] = Symphony::Database()->fetchRow(0, "
 					SELECT
 						f.id,
 						s.name AS `section_name`,
@@ -160,7 +160,7 @@
 			$field = $fm->fetch($field_id);
 
 			if (!isset(self::$cacheValues[$this->get('id').'_'.$entry_id.'_'.$field_id])) {
-				self::$cacheValues[$this->get('id').'_'.$entry_id.'_'.$field_id] = $this->_engine->Database->fetchRow(0, sprintf("
+				self::$cacheValues[$this->get('id').'_'.$entry_id.'_'.$field_id] = Symphony::Database()->fetchRow(0, sprintf("
 						SELECT *
 				 		FROM `tbl_entries_data_%d`
 				 		WHERE `entry_id` = %d
@@ -210,7 +210,7 @@
 
 			if(!is_array($data)) return $data;
 
-			$searchvalue = $this->_engine->Database->fetchRow(0,
+			$searchvalue = Symphony::Database()->fetchRow(0,
 				sprintf("
 					SELECT `entry_id` FROM `tbl_entries_data_%d`
 					WHERE `handle` = '%s'
@@ -221,11 +221,11 @@
 		}
 
 		public function fetchAssociatedEntryCount($value){
-			return $this->_engine->Database->fetchVar('count', 0, "SELECT count(*) AS `count` FROM `tbl_entries_data_".$this->get('id')."` WHERE `relation_id` = '$value'");
+			return Symphony::Database()->fetchVar('count', 0, "SELECT count(*) AS `count` FROM `tbl_entries_data_".$this->get('id')."` WHERE `relation_id` = '$value'");
 		}
 
 		public function fetchAssociatedEntryIDs($value){
-			return $this->_engine->Database->fetchCol('entry_id', "SELECT `entry_id` FROM `tbl_entries_data_".$this->get('id')."` WHERE `relation_id` = '$value'");
+			return Symphony::Database()->fetchCol('entry_id', "SELECT `entry_id` FROM `tbl_entries_data_".$this->get('id')."` WHERE `relation_id` = '$value'");
 		}
 
 		public function appendFormattedElement(&$wrapper, $data, $encode=false){
@@ -236,7 +236,7 @@
 			if(!is_array($data['relation_id'])) $data['relation_id'] = array($data['relation_id']);
 
 			foreach($data['relation_id'] as $relation_id){
-				$primary_field = $this->__findPrimaryFieldValueFromRelationID($relation_id);
+				$primary_field = $this->findPrimaryFieldValueFromRelationID($relation_id);
 
 				$value = $primary_field['value'];
 
@@ -262,10 +262,10 @@
 
 			try{
 				## Figure out the section
-				$section_id = $this->_engine->Database->fetchVar('section_id', 0, "SELECT `section_id` FROM `tbl_entries` WHERE `id` = {$id} LIMIT 1");
+				$section_id = Symphony::Database()->fetchVar('section_id', 0, "SELECT `section_id` FROM `tbl_entries` WHERE `id` = {$id} LIMIT 1");
 
 				## Figure out which related_field_id is from that section
-				$field_id = $this->_engine->Database->fetchVar('field_id', 0, "SELECT f.`id` AS `field_id`
+				$field_id = Symphony::Database()->fetchVar('field_id', 0, "SELECT f.`id` AS `field_id`
 					FROM `tbl_fields` AS `f`
 					LEFT JOIN `tbl_sections` AS `s` ON f.parent_section = s.id
 					WHERE `s`.id = {$section_id} AND f.id IN ('".@implode("', '", $this->get('related_field_id'))."') LIMIT 1");
@@ -284,7 +284,7 @@
 			$limit = $this->get('limit');
 
 			// find the sections of the related fields
-			$sections = $this->_engine->Database->fetch("SELECT DISTINCT (s.id), s.name, f.id as `field_id`
+			$sections = Symphony::Database()->fetch("SELECT DISTINCT (s.id), s.name, f.id as `field_id`
 				 								FROM `tbl_sections` AS `s`
 												LEFT JOIN `tbl_fields` AS `f` ON `s`.id = `f`.parent_section
 												WHERE `f`.id IN ('" . implode("','", $this->get('related_field_id')) . "')
@@ -312,7 +312,7 @@
 
 					if(is_array($results) && !empty($results)){
 						foreach($results as $entry_id){
-							$value = $this->__findPrimaryFieldValueFromRelationID($entry_id);
+							$value = $this->findPrimaryFieldValueFromRelationID($entry_id);
 							$group['values'][$entry_id] = $value['value'];
 						}
 					}
@@ -377,15 +377,15 @@
 			$fields['limit'] = max(1, (int)$this->get('limit'));
 			$fields['related_field_id'] = implode(',', $this->get('related_field_id'));
 
-			$this->_engine->Database->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id'");
+			Symphony::Database()->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id'");
 
-			if(!$this->_engine->Database->insert($fields, 'tbl_fields_' . $this->handle())) return false;
+			if(!Symphony::Database()->insert($fields, 'tbl_fields_' . $this->handle())) return false;
 
 			//$sections = $this->get('related_field_id');
 
 			$this->removeSectionAssociation($id);
 
-			//$section_id = $this->_engine->Database->fetchVar('parent_section', 0, "SELECT `parent_section` FROM `tbl_fields` WHERE `id` = '".$fields['related_field_id']."' LIMIT 1");
+			//$section_id = Symphony::Database()->fetchVar('parent_section', 0, "SELECT `parent_section` FROM `tbl_fields` WHERE `id` = '".$fields['related_field_id']."' LIMIT 1");
 
 			foreach($this->get('related_field_id') as $field_id){
 				$this->createSectionAssociation(NULL, $id, $field_id, $this->get('show_association') == 'yes' ? true : false);
@@ -541,7 +541,7 @@
 		}
 
 		public function createTable(){
-			return $this->_engine->Database->query(
+			return Symphony::Database()->query(
 				"CREATE TABLE IF NOT EXISTS `tbl_entries_data_" . $this->get('id') . "` (
 				`id` int(11) unsigned NOT NULL auto_increment,
 				`entry_id` int(11) unsigned NOT NULL,
