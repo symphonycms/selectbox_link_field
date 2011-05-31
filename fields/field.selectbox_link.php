@@ -49,12 +49,12 @@
 		public function createTable(){
 			return Symphony::Database()->query(
 				"CREATE TABLE IF NOT EXISTS `tbl_entries_data_" . $this->get('id') . "` (
-				`id` int(11) unsigned NOT NULL auto_increment,
-				`entry_id` int(11) unsigned NOT NULL,
-				`relation_id` int(11) unsigned DEFAULT NULL,
-				PRIMARY KEY	 (`id`),
-				KEY `entry_id` (`entry_id`),
-				KEY `relation_id` (`relation_id`)
+					`id` int(11) unsigned NOT NULL auto_increment,
+					`entry_id` int(11) unsigned NOT NULL,
+					`relation_id` int(11) unsigned DEFAULT NULL,
+					PRIMARY KEY (`id`),
+					KEY `entry_id` (`entry_id`),
+					KEY `relation_id` (`relation_id`)
 				) ENGINE=MyISAM;"
 			);
 		}
@@ -74,6 +74,8 @@
 			$values = array();
 			$limit = $this->get('limit');
 
+			if(!is_array($this->get('related_field_id'))) return $values;
+
 			// find the sections of the related fields
 			$sections = Symphony::Database()->fetch("
 				SELECT DISTINCT (s.id), s.name, f.id as `field_id`
@@ -90,16 +92,21 @@
 
 					// build a list of entry IDs with the correct sort order
 					$entryManager = new EntryManager($this->_Parent);
-					$entries = $entryManager->fetch(NULL, $section['id'], $limit, 0);
+					$entries = $entryManager->fetch(NULL, $section['id'], $limit, 0, null, null, false, false);
 
 					$results = array();
-					foreach($entries as $entry) $results[] = $entry->get('id');
+					foreach($entries as $entry) {
+						$results[] = (int)$entry['id'];
+					}
 
 					// if a value is already selected, ensure it is added to the list (if it isn't in the available options)
 					if(!is_null($existing_selection) && !empty($existing_selection)){
-						foreach($existing_selection as $key => $entry_id){
-							$x = $this->findFieldIDFromRelationID($entry_id);
-							if($x == $section['field_id']) $results[] = $entry_id;
+						foreach($existing_selection as $key => $entry_id) {
+							$entry_id = (int)$entry_id;
+							$field_id = $this->findFieldIDFromRelationID($entry_id);
+							if($field_id == $section['field_id']) {
+								$results[] = $entry_id;
+							}
 						}
 					}
 
@@ -130,11 +137,23 @@
 		}
 
 		public function fetchAssociatedEntryCount($value){
-			return Symphony::Database()->fetchVar('count', 0, "SELECT count(*) AS `count` FROM `tbl_entries_data_".$this->get('id')."` WHERE `relation_id` = '$value'");
+			return Symphony::Database()->fetchVar('count', 0, sprintf("
+					SELECT COUNT(*) as `count`
+					FROM `tbl_entries_data_%d`
+					WHERE `relation_id` = %d
+				",
+				$this->get('id'), $value
+			));
 		}
 
 		public function fetchAssociatedEntryIDs($value){
-			return Symphony::Database()->fetchCol('entry_id', "SELECT `entry_id` FROM `tbl_entries_data_".$this->get('id')."` WHERE `relation_id` = '$value'");
+			return Symphony::Database()->fetchCol('entry_id', sprintf("
+					SELECT `entry_id`
+					FROM `tbl_entries_data_%d`
+					WHERE `relation_id` = %d
+				",
+				$this->get('id'), $value
+			));
 		}
 
 		public function fetchAssociatedEntrySearchValue($data, $field_id=NULL, $parent_entry_id=NULL){
@@ -143,35 +162,47 @@
 
 			if(!is_array($data)) return $data;
 
-			$searchvalue = Symphony::Database()->fetchRow(0,
-				sprintf("
-					SELECT `entry_id` FROM `tbl_entries_data_%d`
-					WHERE `handle` = '%s'
-					LIMIT 1", $field_id, addslashes($data['handle']))
-			);
+			$searchvalue = Symphony::Database()->fetchRow(0, sprintf("
+				SELECT `entry_id` FROM `tbl_entries_data_%d`
+				WHERE `handle` = '%s'
+				LIMIT 1",
+				$field_id, addslashes($data['handle'])
+			));
 
 			return $searchvalue['entry_id'];
 		}
 
 		public function findFieldIDFromRelationID($id){
-			if(is_null($id)) return NULL;
+			if(is_null($id) || !is_array($this->get('related_field_id'))) return null;
 
 			if (isset(self::$cacheRelations[$this->get('id').'_'.$id])) {
 				return self::$cacheRelations[$this->get('id').'_'.$id];
 			}
 
 			try{
-				## Figure out the section
-				$section_id = Symphony::Database()->fetchVar('section_id', 0, "SELECT `section_id` FROM `tbl_entries` WHERE `id` = {$id} LIMIT 1");
+				// Get the `section_id` given the `entry_id`
+				$section_id = Symphony::Database()->fetchVar('section_id', 0, sprintf("
+						SELECT `section_id`
+						FROM `tbl_entries`
+						WHERE `id` = %d
+						LIMIT 1
+					", $id
+				));
 
-				## Figure out which related_field_id is from that section
-				$field_id = Symphony::Database()->fetchVar('field_id', 0, "SELECT f.`id` AS `field_id`
-					FROM `tbl_fields` AS `f`
-					LEFT JOIN `tbl_sections` AS `s` ON f.parent_section = s.id
-					WHERE `s`.id = {$section_id} AND f.id IN ('".@implode("', '", $this->get('related_field_id'))."') LIMIT 1");
+				// Figure out which `related_field_id` is from that section
+				$field_id = Symphony::Database()->fetchVar('field_id', 0, sprintf("
+						SELECT f.`id` AS `field_id`
+						FROM `tbl_fields` AS `f`
+						LEFT JOIN `tbl_sections` AS `s` ON f.parent_section = s.id
+						WHERE `s`.id = %d
+						AND f.id IN (%s)
+						LIMIT 1
+					",
+					$section_id, implode(",", $this->get('related_field_id'))
+				));
 			}
 			catch(Exception $e){
-				return NULL;
+				return null;
 			}
 
 			self::$cacheRelations[$this->get('id').'_'.$id] = $field_id;
@@ -180,6 +211,8 @@
 		}
 
 		protected function findPrimaryFieldValueFromRelationID($entry_id){
+			if(!is_numeric($entry_id)) return null;
+
 			$field_id = $this->findFieldIDFromRelationID($entry_id);
 
 			if (!isset(self::$cacheFields[$this->get('id').'_'.$entry_id.'_'.$field_id])) {
@@ -203,7 +236,7 @@
 
 			$primary_field = self::$cacheFields[$this->get('id').'_'.$entry_id.'_'.$field_id];
 
-			if(!$primary_field) return NULL;
+			if(!$primary_field) return null;
 
 			$fm = new FieldManager($this->_Parent);
 			$field = $fm->fetch($field_id);
@@ -344,6 +377,7 @@
 
 		public function displayPublishPanel(XMLElement &$wrapper, $data = null, $error = null, $prefix = null, $postfix = null, $entry_id = null) {
 			$entry_ids = array();
+			$options = array();
 
 			if(!is_null($data['relation_id'])){
 				if(!is_array($data['relation_id'])){
@@ -354,11 +388,9 @@
 				}
 			}
 
-			$states = $this->findOptions($entry_ids);
-			$options = array();
-
 			if($this->get('required') != 'yes') $options[] = array(NULL, false, NULL);
 
+			$states = $this->findOptions($entry_ids);
 			if(!empty($states)){
 				foreach($states as $s){
 					$group = array('label' => $s['name'], 'options' => array());
@@ -387,14 +419,14 @@
 
 		public function processRawFieldData($data, &$status, $simulate=false, $entry_id=NULL){
 			$status = self::__OK__;
-			if(!is_array($data)) return array('relation_id' => $data);
 
-			if(empty($data)) return NULL;
+			if(!is_array($data)) return array('relation_id' => $data);
+			if(empty($data)) return null;
 
 			$result = array();
 
 			foreach($data as $a => $value) {
-			  $result['relation_id'][] = $data[$a];
+				$result['relation_id'][] = (int)$data[$a];
 			}
 
 			return $result;
@@ -413,10 +445,12 @@
 
 			$list = new XMLElement($this->get('element_name'));
 
-			if(!is_array($data['relation_id'])) $data['relation_id'] = array($data['relation_id']);
+			if(!is_array($data['relation_id'])) {
+				$data['relation_id'] = array($data['relation_id']);
+			}
 
 			foreach($data['relation_id'] as $relation_id){
-				$primary_field = $this->findPrimaryFieldValueFromRelationID($relation_id);
+				$primary_field = $this->findPrimaryFieldValueFromRelationID((int)$relation_id);
 
 				$value = $primary_field['value'];
 
@@ -440,14 +474,18 @@
 		public function prepareTableValue($data, XMLElement $link=NULL){
 			$result = array();
 
-			if(!is_array($data) || (is_array($data) && !isset($data['relation_id']))) return parent::prepareTableValue(NULL);
+			if(!is_array($data) || (is_array($data) && !isset($data['relation_id']))) {
+				return parent::prepareTableValue(null);
+			}
 
 			if(!is_array($data['relation_id'])){
 				$data['relation_id'] = array($data['relation_id']);
 			}
 
-			foreach($data['relation_id'] as $relation_id){
-				if((int)$relation_id <= 0) continue;
+			foreach($data['relation_id'] as $relation_id) {
+				$relation_id = (int)$relation_id;
+
+				if($relation_id <= 0) continue;
 
 				$primary_field = $this->findPrimaryFieldValueFromRelationID($relation_id);
 
@@ -457,7 +495,7 @@
 			}
 
 			if(!is_null($link)){
-				$label = NULL;
+				$label = '';
 				foreach($result as $item){
 					$label .= ' ' . $item['value'];
 				}
@@ -465,7 +503,7 @@
 				return $link->generate();
 			}
 
-			$output = NULL;
+			$output = '';
 
 			foreach($result as $relation_id => $item){
 				$link = Widget::Anchor($item['value'], sprintf('%s/symphony/publish/%s/edit/%d/', URL, $item['section_handle'], $relation_id));
@@ -485,6 +523,7 @@
 			if(preg_match('/^sql:\s*/', $data[0], $matches)) {
 				$data = trim(array_pop(explode(':', $data[0], 2)));
 
+				// Check for NOT NULL (ie. Entries that have any value)
 				if(strpos($data, "NOT NULL") !== false) {
 
 					$joins .= " LEFT JOIN
@@ -492,7 +531,9 @@
 								ON (`e`.`id` = `t{$field_id}`.entry_id)";
 					$where .= " AND `t{$field_id}`.relation_id IS NOT NULL ";
 
-				} else if(strpos($data, "NULL") !== false) {
+				}
+				// Check for NULL (ie. Entries that have no value)
+				else if(strpos($data, "NULL") !== false) {
 
 					$joins .= " LEFT JOIN
 									`tbl_entries_data_{$field_id}` AS `t{$field_id}`
