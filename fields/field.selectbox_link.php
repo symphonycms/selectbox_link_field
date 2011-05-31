@@ -252,7 +252,7 @@
 					if($f->get('id') != $this->get('id') && $f->canPrePopulate()) {
 						$fields[] = array(
 							$f->get('id'),
-							@in_array($f->get('id'), $this->get('related_field_id')),
+							is_array($this->get('related_field_id')) ? in_array($f->get('id'), $this->get('related_field_id')) : false,
 							$f->get('label')
 						);
 					}
