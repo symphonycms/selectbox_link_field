@@ -5,8 +5,8 @@
 		public function about(){
 			return array(
 				'name' => 'Field: Select Box Link',
-				'version' => '1.19',
-				'release-date' => '2011-01-29',
+				'version' => '1.20pre',
+				'release-date' => 'unreleased',
 				'author' => array(
 					'name' => 'Symphony Team',
 					'website' => 'http://www.symphony-cms.com',
@@ -16,7 +16,6 @@
 		}
 
 		public function install(){
-
 			try{
 				Symphony::Database()->query("CREATE TABLE IF NOT EXISTS `tbl_fields_selectbox_link` (
 					  `id` int(11) unsigned NOT NULL auto_increment,
@@ -46,7 +45,6 @@
 		}
 
 		public function update($previousVersion){
-
 			try{
 				if(version_compare($previousVersion, '1.6', '<')){
 					Symphony::Database()->query(
@@ -102,7 +100,4 @@
 
 			return true;
 		}
-
-
-
 	}
