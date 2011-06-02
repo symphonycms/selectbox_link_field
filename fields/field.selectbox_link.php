@@ -35,7 +35,7 @@
 		}
 
 		public function allowDatasourceOutputGrouping(){
-			return true;
+			return ($this->get('allow_multiple_selection') == 'yes' ? false : true);
 		}
 
 		public function allowDatasourceParamOutput(){
