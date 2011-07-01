@@ -525,7 +525,6 @@
 
 				// Check for NOT NULL (ie. Entries that have any value)
 				if(strpos($data, "NOT NULL") !== false) {
-
 					$joins .= " LEFT JOIN
 									`tbl_entries_data_{$field_id}` AS `t{$field_id}`
 								ON (`e`.`id` = `t{$field_id}`.entry_id)";
@@ -534,7 +533,6 @@
 				}
 				// Check for NULL (ie. Entries that have no value)
 				else if(strpos($data, "NULL") !== false) {
-
 					$joins .= " LEFT JOIN
 									`tbl_entries_data_{$field_id}` AS `t{$field_id}`
 								ON (`e`.`id` = `t{$field_id}`.entry_id)";
@@ -599,15 +597,6 @@
 			}
 
 			return true;
-		}
-
-	/*-------------------------------------------------------------------------
-		Sorting:
-	-------------------------------------------------------------------------*/
-
-		public function buildSortingSQL(&$joins, &$where, &$sort, $order='ASC'){
-			$joins .= "INNER JOIN `tbl_entries_data_".$this->get('id')."` AS `ed` ON (`e`.`id` = `ed`.`entry_id`) ";
-			$sort = 'ORDER BY ' . (in_array(strtolower($order), array('random', 'rand')) ? 'RAND()' : "`ed`.`relation_id` $order");
 		}
 
 	/*-------------------------------------------------------------------------
