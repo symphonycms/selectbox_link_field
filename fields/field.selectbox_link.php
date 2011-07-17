@@ -193,12 +193,16 @@
 		protected function findRelatedValues(array $relation_id = array()) {
 			// 1. Get the field instances from the SBL's related_field_id's
 			$entryManager = new EntryManager(Symphony::Engine());
-			$fields = $entryManager->fieldManager->fetch(
-				implode(',', $this->get('related_field_id'))
-			);
+
+			// FieldManager->fetch doesn't take an array of ID's (unlike other managers)
+			// so instead we'll instead build a custom where to emulate the same result
+			$where = ' AND id IN (' . implode(',', $this->get('related_field_id')) . ') ';
+			$fields = $entryManager->fieldManager->fetch(null, null, 'ASC', 'sortorder', null, null, $where);
 			if(!is_array($fields)) {
 				$fields = array($fields);
 			}
+
+			if(empty($fields)) return array();
 
 			// 2. Find all the provided `relation_id`'s related section
 			$relation_ids = Symphony::Database()->fetch(sprintf("
@@ -268,7 +272,7 @@
 		public function displaySettingsPanel(&$wrapper, $errors=NULL){
 			parent::displaySettingsPanel($wrapper, $errors);
 
-			$sectionManager = new SectionManager($this->_engine);
+			$sectionManager = new SectionManager(Administration::instance());
 			$sections = $sectionManager->fetch(NULL, 'ASC', 'sortorder');
 			$options = array();
 
