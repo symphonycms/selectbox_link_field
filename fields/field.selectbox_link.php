@@ -24,7 +24,7 @@
 			$this->set('limit', 20);
 			$this->set('related_field_id', array());
 
-			if(!isset(self::$em)) {
+			if(!isset(self::$em) && class_exists('EntryManager')) {
 				self::$em = new EntryManager(Symphony::Engine());
 			}
 		}
