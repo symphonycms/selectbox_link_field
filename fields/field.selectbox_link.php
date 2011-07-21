@@ -2,7 +2,9 @@
 
 	if(!defined('__IN_SYMPHONY__')) die('<h2>Symphony Error</h2><p>You cannot directly access this file</p>');
 
-	Class fieldSelectBox_Link extends Field{
+	Class fieldSelectBox_Link extends Field {
+
+		private static $cache = array();
 
 	/*-------------------------------------------------------------------------
 		Definition:
@@ -191,6 +193,11 @@
 		}
 
 		protected function findRelatedValues(array $relation_id = array()) {
+			// The result of this function is cached for fields that repeatedly
+			// call it during a single page execution
+			$hash = md5($relation_id);
+			if(isset(self::$cache[$hash])) return self::$cache[$hash];
+
 			// 1. Get the field instances from the SBL's related_field_id's
 			$entryManager = new EntryManager(Symphony::Engine());
 
@@ -257,6 +264,9 @@
 			}
 
 			// 6. Return the resulting array containing the id, section_handle, section_name and value
+			// Additionally set the cache result for repeated calls
+			self::$cache[$hash] = $relation_data;
+
 			return $relation_data;
 		}
 
