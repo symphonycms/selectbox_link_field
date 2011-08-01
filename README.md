@@ -1,8 +1,8 @@
 # Select Box Link Field
 
-- Version: 1.20pre
+- Version: 1.20
 - Author: Symphony Team (team@symphony-cms.com)
-- Build Date: unreleased
+- Build Date: 1st August 2011
 - Requirements: Symphony 2.0.6 or greater
 
 
