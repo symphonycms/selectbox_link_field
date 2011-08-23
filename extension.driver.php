@@ -5,8 +5,8 @@
 		public function about(){
 			return array(
 				'name' => 'Field: Select Box Link',
-				'version' => '1.20',
-				'release-date' => '2011-08-01',
+				'version' => '1.21',
+				'release-date' => 'unreleased',
 				'author' => array(
 					'name' => 'Symphony Team',
 					'website' => 'http://www.symphony-cms.com',
@@ -17,16 +17,18 @@
 
 		public function install(){
 			try{
-				Symphony::Database()->query("CREATE TABLE IF NOT EXISTS `tbl_fields_selectbox_link` (
-					  `id` int(11) unsigned NOT NULL auto_increment,
-					  `field_id` int(11) unsigned NOT NULL,
-					  `allow_multiple_selection` enum('yes','no') NOT NULL default 'no',
-					  `show_association` enum('yes','no') NOT NULL default 'yes',
-					  `related_field_id` VARCHAR(255) NOT NULL,
-					  `limit` int(4) unsigned NOT NULL default '20',
-				  PRIMARY KEY  (`id`),
-				  KEY `field_id` (`field_id`)
-				)");
+				Symphony::Database()->query("
+					CREATE TABLE IF NOT EXISTS `tbl_fields_selectbox_link` (
+						`id` int(11) unsigned NOT NULL auto_increment,
+						`field_id` int(11) unsigned NOT NULL,
+						`allow_multiple_selection` enum('yes','no') NOT NULL default 'no',
+						`show_association` enum('yes','no') NOT NULL default 'yes',
+						`related_field_id` VARCHAR(255) NOT NULL,
+						`limit` int(4) unsigned NOT NULL default '20',
+						PRIMARY KEY  (`id`),
+						KEY `field_id` (`field_id`)
+					) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+				");
 			}
 			catch(Exception $e){
 				return false;

@@ -5,14 +5,13 @@
 	Class fieldSelectBox_Link extends Field {
 
 		private static $cache = array();
-		private static $em = null;
 
 	/*-------------------------------------------------------------------------
 		Definition:
 	-------------------------------------------------------------------------*/
 
-		public function __construct(&$parent){
-			parent::__construct($parent);
+		public function __construct(){
+			parent::__construct();
 			$this->_name = __('Select Box Link');
 			$this->_required = true;
 			$this->_showassociation = true;
@@ -23,10 +22,6 @@
 			$this->set('required', 'yes');
 			$this->set('limit', 20);
 			$this->set('related_field_id', array());
-
-			if(!isset(self::$em) && class_exists('EntryManager')) {
-				self::$em = new EntryManager(Symphony::Engine());
-			}
 		}
 
 		public function canToggle(){
@@ -58,7 +53,7 @@
 					PRIMARY KEY (`id`),
 					KEY `entry_id` (`entry_id`),
 					KEY `relation_id` (`relation_id`)
-				) ENGINE=MyISAM;"
+				) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
 			);
 		}
 
@@ -97,7 +92,7 @@
 					);
 
 					// build a list of entry IDs with the correct sort order
-					$entries = self::$em->fetch(NULL, $section['id'], $limit, 0, null, null, false, false);
+					$entries = EntryManager::fetch(NULL, $section['id'], $limit, 0, null, null, false, false);
 
 					$results = array();
 					foreach($entries as $entry) {
@@ -204,7 +199,7 @@
 			$where = ' AND id IN (' . implode(',', $this->get('related_field_id')) . ') ';
 			$hash = md5($where);
 			if(!isset(self::$cache[$hash]['fields'])) {
-				$fields = self::$em->fieldManager->fetch(null, null, 'ASC', 'sortorder', null, null, $where);
+				$fields = FieldManager::fetch(null, null, 'ASC', 'sortorder', null, null, $where);
 				if(!is_array($fields)) {
 					$fields = array($fields);
 				}
@@ -258,7 +253,7 @@
 						}
 					}
 
-					$entries = self::$em->fetch(array_values($entry_data), $section_id, null, null, null, null, false, true, $schema);
+					$entries = EntryManager::fetch(array_values($entry_data), $section_id, null, null, null, null, false, true, $schema);
 
 					// 5. Loop over the Entries, passing the data to Field->prepareTableValue
 					foreach($entries as $entry) {
@@ -620,7 +615,7 @@
 			$groups = array($this->get('element_name') => array());
 
 			$related_field_id = current($this->get('related_field_id'));
-			$field = self::$em->fieldManager->fetch($related_field_id);
+			$field = FieldManager::fetch($related_field_id);
 
 			if(!$field instanceof Field) return;
 
@@ -628,7 +623,7 @@
 				$data = $r->getData($this->get('id'));
 				$value = $data['relation_id'];
 
-				$related_data = self::$em->fetch($value, $field->get('parent_section'), 1, null, null, null, false, true, array($field->get('element_name')));
+				$related_data = EntryManager::fetch($value, $field->get('parent_section'), 1, null, null, null, false, true, array($field->get('element_name')));
 				$related_data = current($related_data);
 
 				if(!$related_data instanceof Entry) continue;
