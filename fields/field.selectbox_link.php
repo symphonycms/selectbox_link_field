@@ -221,6 +221,7 @@
 			// We also cache the result using the `relation_id` as identifier
 			// to prevent unnecessary queries
 			$hash = md5(serialize($relation_id));
+			$relation_id = array_filter($relation_id);
 			if(!isset(self::$cache[$hash]['relation_data'])) {
 				$relation_ids = Symphony::Database()->fetch(sprintf("
 					SELECT e.id, e.section_id, s.name, s.handle
