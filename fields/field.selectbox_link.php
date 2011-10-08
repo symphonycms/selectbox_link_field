@@ -172,7 +172,7 @@
 
 			try {
 				// Figure out which `related_field_id` is from that section
-				$relations = Symphony::Database()->fetchCol('id', 0, sprintf("
+				$relations = Symphony::Database()->fetchCol('id', sprintf("
 						SELECT e.id
 						FROM `tbl_fields` AS `f`
 						LEFT JOIN `tbl_sections` AS `s` ON (f.parent_section = s.id)
