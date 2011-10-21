@@ -1,8 +1,8 @@
 # Select Box Link Field
 
-- Version: 1.20
+- Version: 1.21
 - Author: Symphony Team (team@symphony-cms.com)
-- Build Date: 1st August 2011
+- Build Date: 22nd October 2011
 - Requirements: Symphony 2.0.6 or greater
 
 
@@ -27,6 +27,17 @@
 
 
 ### Change Log
+
+*1.21*
+
+- Correctly load information about entries that fall outside of the limit (but are still attached to an entry)
+- Prevention for an edge case where empty ID's are thrown around
+
+*1.20*
+
+- Updates for Symphony 2.2
+- Performance enhancements
+- Don't allow grouping if multiple options are selected
 
 *1.19*
 
