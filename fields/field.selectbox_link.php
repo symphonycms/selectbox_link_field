@@ -220,8 +220,11 @@
 			// 2. Find all the provided `relation_id`'s related section
 			// We also cache the result using the `relation_id` as identifier
 			// to prevent unnecessary queries
-			$hash = md5(serialize($relation_id));
 			$relation_id = array_filter($relation_id);
+			if(empty($relation_id)) return array();
+
+			$hash = md5(serialize($relation_id));
+
 			if(!isset(self::$cache[$hash]['relation_data'])) {
 				$relation_ids = Symphony::Database()->fetch(sprintf("
 					SELECT e.id, e.section_id, s.name, s.handle
@@ -470,7 +473,6 @@
 			if(!is_array($data['relation_id'])) {
 				$data['relation_id'] = array($data['relation_id']);
 			}
-
 			$related_values = $this->findRelatedValues($data['relation_id']);
 
 			foreach($related_values as $relation) {
