@@ -45,6 +45,10 @@
 			return true;
 		}
 
+		public function requiresSQLGrouping(){
+			return ($this->get('allow_multiple_selection') == 'yes' ? true : false);
+		}
+
 	/*-------------------------------------------------------------------------
 		Setup:
 	-------------------------------------------------------------------------*/
