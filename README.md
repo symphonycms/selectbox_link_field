@@ -1,14 +1,14 @@
 # Select Box Link Field
 
-- Version: 1.21
+- Version: 1.22
 - Author: Symphony Team (team@symphony-cms.com)
-- Build Date: 22nd October 2011
-- Requirements: Symphony 2.0.6 or greater
+- Build Date: 4th November 2011
+- Requirements: Symphony 2.2 or greater
 
 
 ## Installation
 
-1. Upload the 'selectbox_link_field' folder in this archive to your Symphony 'extensions' folder.
+1. Upload the `selectbox_link_field` folder in this archive to your Symphony 'extensions' folder.
 
 2. Enable it by selecting the "Field: Select Box Link", choose Enable from the with-selected menu, then click Apply.
 
@@ -28,6 +28,10 @@
 
 ### Change Log
 
+*1.22*
+- Implement `requiresSQLGrouping` function which prevents some oddities with pagination
+- Preform some checks for `relation_id` to improve compatibility with extensions that extend the Select Box Link field.
+
 *1.21*
 
 - Correctly load information about entries that fall outside of the limit (but are still attached to an entry)
@@ -41,11 +45,11 @@
 
 *1.19*
 
-- Allow the linked section's public column's visibility to be toggled
+- Allow the linked section's public column visibility to be toggled
 
 *1.18*
 
-- Prevent NULL Relations from appearing in the Output XML
+- Prevent `null` Relations from appearing in the Output XML
 
 *1.17*
 
@@ -58,7 +62,7 @@
 
 *1.15*
 
-- 'relation_id' can now be a NULL value. Fixes issue [#1](http://symphony-cms.com/download/extensions/issues/view/20054/1/)
+- `relation_id` can now be a `null` value. Fixes issue [#1](http://symphony-cms.com/download/extensions/issues/view/20054/1/)
 
 *1.14*
 
@@ -67,13 +71,13 @@
 
 *1.13*
 
-- Added filtering by handle functionality (CreativeDutchmen)
+- Added filtering by handle functionality (@creativedutchmen)
 
 *1.12*
 
-- Fixed a couple of issues where 'related_field_id' was returning the wrong type. (rowan)
-- In dropdown options, sort Sections by their Symphony order and sort Entries by their Symphony order (using EntryManager) (Nick Dunn)
-- Sort Sections in field's settings panel by Symphony order (Nick Dunn)
+- Fixed a couple of issues where 'related_field_id' was returning the wrong type. (@buzzomatic)
+- In dropdown options, sort Sections by their Symphony order and sort Entries by their Symphony order (using EntryManager) (@nickdunn)
+- Sort Sections in field's settings panel by Symphony order (@nickdunn)
 
 *1.11*
 
@@ -95,7 +99,7 @@
 
 *1.7*
 
-- Updated fetchAssociatedEntrySearchValue() to make use of entry id passed in, if available
+- Updated `fetchAssociatedEntrySearchValue()` to make use of `entry_id` passed in, if available
 
 *1.6*
 
@@ -116,9 +120,9 @@
 
 *1.2*
 
-- Should correctly work with fields that do now use a 'value' column in the database. This would cause an empty select box.
+- Should correctly work with fields that do now use a `value` column in the database. This would cause an empty select box.
 
 *1.1*
 
 - Added ability to set field to required/not required.
-- Added multi-select property (thanks to czheng)
+- Added multi-select property (thanks to @czheng)
