@@ -470,7 +470,7 @@
 	-------------------------------------------------------------------------*/
 
 		public function appendFormattedElement(&$wrapper, $data, $encode=false){
-			if(!is_array($data) || empty($data) || is_null($data['relation_id'])) return;
+			if(!is_array($data) || empty($data) || is_null($data['relation_id']) || empty($data['relation_id'])) return;
 
 			$list = new XMLElement($this->get('element_name'));
 
