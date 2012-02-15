@@ -331,7 +331,7 @@
 
 			// Maximum entries
 			$label = Widget::Label();
-			$input = Widget::Input('fields['.$this->get('sortorder').'][limit]', $this->get('limit'));
+			$input = Widget::Input('fields['.$this->get('sortorder').'][limit]', (string)$this->get('limit'));
 			$input->setAttribute('size', '3');
 			$label->setValue(__('Limit to the %s most recent entries', array($input->generate())));
 			$wrapper->appendChild($label);
