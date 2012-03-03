@@ -46,7 +46,7 @@
 			return false;
 		}
 
-		public function update($previousVersion){
+		public function update($previousVersion = false){
 			try{
 				if(version_compare($previousVersion, '1.6', '<')){
 					Symphony::Database()->query(
