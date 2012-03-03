@@ -126,8 +126,8 @@
 			return $output;
 		}
 
-		public function toggleFieldData($data, $new_value){
-			$data['relation_id'] = $new_value;
+		public function toggleFieldData(array $data, $newState, $entry_id=null){
+			$data['relation_id'] = $newState;
 			return $data;
 		}
 
@@ -281,12 +281,12 @@
 		Settings:
 	-------------------------------------------------------------------------*/
 
-		public function findDefaults(&$fields){
-			if(!isset($fields['allow_multiple_selection'])) $fields['allow_multiple_selection'] = 'no';
-			if(!isset($fields['show_association'])) $fields['show_association'] = 'yes';
+		public function findDefaults(array &$settings){
+			if(!isset($settings['allow_multiple_selection'])) $settings['allow_multiple_selection'] = 'no';
+			if(!isset($settings['show_association'])) $settings['show_association'] = 'yes';
 		}
 
-		public function displaySettingsPanel(&$wrapper, $errors=NULL){
+		public function displaySettingsPanel(XMLElement &$wrapper, $errors = null){
 			parent::displaySettingsPanel($wrapper, $errors);
 
 			$sectionManager = new SectionManager(Administration::instance());
@@ -350,7 +350,7 @@
 			$wrapper->appendChild($div);
 		}
 
-		public function checkFields(&$errors, $checkForDuplicates = true) {
+		public function checkFields(array &$errors, $checkForDuplicates = true) {
 			parent::checkFields($errors, $checkForDuplicates);
 
 			$related_fields = $this->get('related_field_id');
@@ -392,7 +392,7 @@
 		Publish:
 	-------------------------------------------------------------------------*/
 
-		public function displayPublishPanel(XMLElement &$wrapper, $data = null, $error = null, $prefix = null, $postfix = null, $entry_id = null) {
+		public function displayPublishPanel(XMLElement &$wrapper, $data = null, $flagWithError = null, $fieldnamePrefix = null, $fieldnamePostfix = null, $entry_id = null) {
 			$entry_ids = array();
 			$options = array();
 
@@ -418,7 +418,7 @@
 				}
 			}
 
-			$fieldname = 'fields'.$prefix.'['.$this->get('element_name').']'.$postfix;
+			$fieldname = 'fields'.$fieldnamePrefix.'['.$this->get('element_name').']'.$fieldnamePostfix;
 			if($this->get('allow_multiple_selection') == 'yes') $fieldname .= '[]';
 
 			$label = Widget::Label($this->get('label'));
@@ -428,13 +428,13 @@
 				))
 			);
 
-			if(!is_null($error)) {
-				$wrapper->appendChild(Widget::wrapFormElementWithError($label, $error));
+			if(!is_null($flagWithError)) {
+				$wrapper->appendChild(Widget::wrapFormElementWithError($label, $flagWithError));
 			}
 			else $wrapper->appendChild($label);
 		}
 
-		public function processRawFieldData($data, &$status, $simulate=false, $entry_id=NULL){
+		public function processRawFieldData($data, &$status, &$message=null, $simulate=false, $entry_id=null) {
 			$status = self::__OK__;
 
 			if(!is_array($data)) return array('relation_id' => $data);
@@ -457,7 +457,7 @@
 		Output:
 	-------------------------------------------------------------------------*/
 
-		public function appendFormattedElement(&$wrapper, $data, $encode=false){
+		public function appendFormattedElement(XMLElement &$wrapper, $data, $encode = false, $mode = null, $entry_id = null) {
 			if(!is_array($data) || empty($data) || is_null($data['relation_id'])) return;
 
 			$list = new XMLElement($this->get('element_name'));
@@ -484,11 +484,11 @@
 			$wrapper->appendChild($list);
 		}
 
-		public function getParameterPoolValue($data){
+		public function getParameterPoolValue(array $data, $entry_id=NULL){
 			return $data['relation_id'];
 		}
 
-		public function prepareTableValue($data, XMLElement $link=NULL){
+		public function prepareTableValue($data, XMLElement $link = null, $entry_id = null) {
 			$result = array();
 
 			if(!is_array($data) || (is_array($data) && !isset($data['relation_id']))) {
