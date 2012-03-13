@@ -262,7 +262,7 @@
 							'id' => $entry->get('id'),
 							'section_handle' => $section_info[$section_id]['handle'],
 							'section_name' => $section_info[$section_id]['name'],
-							'value' => $field->prepareTableValue($entry->getData($field->get('id')))
+							'value' => $field->getParameterPoolValue($entry->getData($field->get('id')), $entry->get('id'))
 						);
 					}
 				}
@@ -289,8 +289,7 @@
 		public function displaySettingsPanel(XMLElement &$wrapper, $errors = null){
 			parent::displaySettingsPanel($wrapper, $errors);
 
-			$sectionManager = new SectionManager(Administration::instance());
-			$sections = $sectionManager->fetch(NULL, 'ASC', 'sortorder');
+			$sections = SectionManager::fetch(NULL, 'ASC', 'sortorder');
 			$options = array();
 
 			if(is_array($sections) && !empty($sections)) foreach($sections as $section){
@@ -325,7 +324,7 @@
 
 			// Add options
 			if(isset($errors['related_field_id'])) {
-				$wrapper->appendChild(Widget::wrapFormElementWithError($label, $errors['related_field_id']));
+				$wrapper->appendChild(Widget::Error($label, $errors['related_field_id']));
 			}
 			else $wrapper->appendChild($label);
 
@@ -342,7 +341,7 @@
 			if($this->get('allow_multiple_selection') == 'yes') $input->setAttribute('checked', 'checked');
 			$label->setValue($input->generate() . ' ' . __('Allow selection of multiple options'));
 
-			$div = new XMLElement('div', NULL, array('class' => 'compact'));
+			$div = new XMLElement('div', NULL, array('class' => 'two columns'));
 			$div->appendChild($label);
 			$this->appendShowAssociationCheckbox($div);
 			$this->appendRequiredCheckbox($div);
@@ -429,7 +428,7 @@
 			);
 
 			if(!is_null($flagWithError)) {
-				$wrapper->appendChild(Widget::wrapFormElementWithError($label, $flagWithError));
+				$wrapper->appendChild(Widget::Error($label, $flagWithError));
 			}
 			else $wrapper->appendChild($label);
 		}
