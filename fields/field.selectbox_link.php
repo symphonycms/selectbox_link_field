@@ -528,7 +528,11 @@
 		Filtering:
 	-------------------------------------------------------------------------*/
 
-		public function buildDSRetrivalSQL($data, &$joins, &$where, $andOperation=false){
+		public function buildDSRetrivalSQL($data, &$joins, &$where, $andOperation = false) {
+			return $this->buildDSRetrievalSQL($data, $joins, $where, $andOperation);
+		}
+
+		public function buildDSRetrievalSQL($data, &$joins, &$where, $andOperation=false){
 			$field_id = $this->get('id');
 
 			if(preg_match('/^sql:\s*/', $data[0], $matches)) {
