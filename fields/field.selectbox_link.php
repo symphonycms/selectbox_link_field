@@ -92,6 +92,7 @@
 					);
 
 					// build a list of entry IDs with the correct sort order
+					EntryManager::setFetchSorting('date', 'DESC');
 					$entries = EntryManager::fetch(NULL, $section['id'], $limit, 0, null, null, false, false);
 
 					$results = array();
@@ -223,6 +224,7 @@
 					FROM `tbl_entries` AS `e`
 					LEFT JOIN `tbl_sections` AS `s` ON (s.id = e.section_id)
 					WHERE e.id IN (%s)
+					ORDER BY `e`.creation_date DESC
 					",
 					implode(',', $relation_id)
 				));
@@ -254,6 +256,7 @@
 						}
 					}
 
+					EntryManager::setFetchSorting('date', 'DESC');
 					$entries = EntryManager::fetch(array_values($entry_data), $section_id, null, null, null, null, false, true, $schema);
 
 					// 5. Loop over the Entries, passing the data to Field->prepareTableValue
@@ -330,6 +333,7 @@
 
 			// Maximum entries
 			$label = Widget::Label();
+			$label->setAttribute('class', 'column');
 			$input = Widget::Input('fields['.$this->get('sortorder').'][limit]', (string)$this->get('limit'));
 			$input->setAttribute('size', '3');
 			$label->setValue(__('Limit to the %s most recent entries', array($input->generate())));
@@ -337,6 +341,7 @@
 
 			// Allow selection of multiple items
 			$label = Widget::Label();
+			$label->setAttribute('class', 'column');
 			$input = Widget::Input('fields['.$this->get('sortorder').'][allow_multiple_selection]', 'yes', 'checkbox');
 			if($this->get('allow_multiple_selection') == 'yes') $input->setAttribute('checked', 'checked');
 			$label->setValue($input->generate() . ' ' . __('Allow selection of multiple options'));
@@ -375,7 +380,7 @@
 			$fields['limit'] = max(1, (int)$this->get('limit'));
 			$fields['related_field_id'] = implode(',', $this->get('related_field_id'));
 
-			Symphony::Database()->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id'");
+			Symphony::Database()->delete("tbl_fields_" . $this->handle(), "`field_id` = '$id'");
 
 			if(!Symphony::Database()->insert($fields, 'tbl_fields_' . $this->handle())) return false;
 
