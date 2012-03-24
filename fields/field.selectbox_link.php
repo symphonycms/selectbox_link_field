@@ -398,7 +398,9 @@
 
 		public function displayPublishPanel(XMLElement &$wrapper, $data = null, $flagWithError = null, $fieldnamePrefix = null, $fieldnamePostfix = null, $entry_id = null) {
 			$entry_ids = array();
-			$options = array();
+			$options = array(
+				array(NULL, false, NULL)
+			);
 
 			if(!is_null($data['relation_id'])){
 				if(!is_array($data['relation_id'])){
@@ -408,8 +410,6 @@
 					$entry_ids = array_values($data['relation_id']);
 				}
 			}
-
-			if($this->get('required') != 'yes') $options[] = array(NULL, false, NULL);
 
 			$states = $this->findOptions($entry_ids);
 			if(!empty($states)){
@@ -426,6 +426,7 @@
 			if($this->get('allow_multiple_selection') == 'yes') $fieldname .= '[]';
 
 			$label = Widget::Label($this->get('label'));
+			if($this->get('required') != 'yes') $label->appendChild(new XMLElement('i', __('Optional')));
 			$label->appendChild(
 				Widget::Select($fieldname, $options, ($this->get('allow_multiple_selection') == 'yes' ? array(
 					'multiple' => 'multiple') : NULL
