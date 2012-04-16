@@ -5,8 +5,8 @@
 		public function about(){
 			return array(
 				'name' => 'Field: Select Box Link',
-				'version' => '1.21',
-				'release-date' => 'unreleased',
+				'version' => '1.23',
+				'release-date' => '2012-16-04',
 				'author' => array(
 					'name' => 'Symphony Team',
 					'website' => 'http://www.symphony-cms.com',
@@ -50,8 +50,7 @@
 			try{
 				if(version_compare($previousVersion, '1.6', '<')){
 					Symphony::Database()->query(
-						"ALTER TABLE `tbl_fields_selectbox_link`
-						ADD `limit` INT(4) UNSIGNED NOT NULL DEFAULT '20'"
+						"ALTER TABLE `tbl_fields_selectbox_link` ADD `limit` INT(4) UNSIGNED NOT NULL DEFAULT '20'"
 					);
 				}
 			}
