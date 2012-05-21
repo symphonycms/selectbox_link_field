@@ -2,19 +2,6 @@
 
 	Class extension_selectbox_link_field extends Extension{
 
-		public function about(){
-			return array(
-				'name' => 'Field: Select Box Link',
-				'version' => '1.23',
-				'release-date' => '2012-16-04',
-				'author' => array(
-					'name' => 'Symphony Team',
-					'website' => 'http://www.symphony-cms.com',
-					'email' => 'team@symphony-cms.com'
-				)
-			);
-		}
-
 		public function install(){
 			try{
 				Symphony::Database()->query("

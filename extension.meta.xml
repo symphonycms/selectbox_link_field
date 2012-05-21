@@ -15,8 +15,8 @@
 	</authors>
 	<releases>
 		<release version="1.23" date="2012-16-04" min="2.3">
-			- [#16](https://github.com/symphonycms/selectbox_link_field/issues/16) Ensure options are sorted by recency
 			- Updates for Symphony 2.3
+			- [#16](https://github.com/symphonycms/selectbox_link_field/issues/16) Ensure options are sorted by recency
 			- When a field is required, force users to select an option which is consistent with Symphony 2.3 behaviour
 			- Consistency updates with base core classes
 		</release>
