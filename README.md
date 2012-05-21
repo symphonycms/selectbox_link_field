@@ -31,7 +31,8 @@ The Select Box Link supports the following filtering options in your data source
 - `Red Cats` or `not: Red Cats`: Return all entries where the linked entry has the value of `Red Cats` (or does not have the value `Red Cats`)
 - `red-cats` or `not: red-cats`: Return all entries where the linked entry has the handle of `red-cats` (or does not have the handle `red-cats`)
 - `1` or `not: 1`: Return all entries where the linked entry ID is `1`, (or is not `1`)
-- `sql: NULL`: Return all entries that do not have a linked entry
-- `sql: NOT NULL`: Return all entries that do have a linked entry
+- `sql-null-or-not: 1`: Return all entries where the linked entry ID is not 1 or the entry has no linked entries.
+- `sql: NULL`: Return all entries that do not have any linked entries
+- `sql: NOT NULL`: Return all entries that have a linked entry
 
 Please note that predicate filters, such as `not:` or `sql:`, will ignore all other [data source filters](http://symphony-cms.com/learn/concepts/view/data-source-filters/) for that field.

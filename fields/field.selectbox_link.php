@@ -564,9 +564,15 @@
 			}
 			else {
 				$negation = false;
+				$null = false;
 				if(preg_match('/^not:/', $data[0])) {
 					$data[0] = preg_replace('/^not:/', null, $data[0]);
 					$negation = true;
+				}
+				else if(preg_match('/^sql-null-or-not:/', $data[0])) {
+					$data[0] = preg_replace('/^sql-null-or-not:/', null, $data[0]);
+					$negation = true;
+					$null = true;
 				}
 
 				foreach($data as $key => &$value) {
@@ -608,12 +614,16 @@
 					foreach($data as $key => $bit){
 						$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id$key` ON (`e`.`id` = `t$field_id$key`.entry_id) ";
 						$where .= " AND `t$field_id$key`.relation_id $condition '$bit' ";
+
+						if($null) $where .= " OR `t$field_id$key`.relation_id` IS NULL ";
 					}
 				}
 				else {
 					$condition = ($negation) ? 'NOT IN' : 'IN';
 					$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id` ON (`e`.`id` = `t$field_id`.entry_id) ";
 					$where .= " AND `t$field_id`.relation_id $condition ('".implode("', '", $data)."') ";
+
+					if($null) $where .= " OR `t$field_id`.relation_id` IS NULL ";
 				}
 
 			}
