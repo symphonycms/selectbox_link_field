@@ -2,7 +2,7 @@
 
 - Version: 1.23
 - Author: Symphony Team
-- Release Date: 16th April 2012
+- Release Date: 22nd May 2012
 - Requirements: Symphony 2.3 or greater
 
 ## Installation
