@@ -613,17 +613,27 @@
 					$condition = ($negation) ? '!=' : '=';
 					foreach($data as $key => $bit){
 						$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id$key` ON (`e`.`id` = `t$field_id$key`.entry_id) ";
-						$where .= " AND `t$field_id$key`.relation_id $condition '$bit' ";
+						$where .= " AND (`t$field_id$key`.relation_id $condition '$bit' ";
 
-						if($null) $where .= " OR `t$field_id$key`.relation_id` IS NULL ";
+						if($null) {
+							$where .= " OR `t$field_id$key`.`relation_id` IS NULL) ";
+						}
+						else {
+							$where .= ") ";
+						}
 					}
 				}
 				else {
 					$condition = ($negation) ? 'NOT IN' : 'IN';
 					$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id` ON (`e`.`id` = `t$field_id`.entry_id) ";
-					$where .= " AND `t$field_id`.relation_id $condition ('".implode("', '", $data)."') ";
+					$where .= " AND (`t$field_id`.relation_id $condition ('".implode("', '", $data)."') ";
 
-					if($null) $where .= " OR `t$field_id`.relation_id` IS NULL ";
+					if($null) {
+						$where .= " OR `t$field_id`.`relation_id` IS NULL) ";
+					}
+					else {
+						$where .= ") ";
+					}
 				}
 
 			}
