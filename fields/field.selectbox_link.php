@@ -524,7 +524,7 @@
 			$output = '';
 
 			foreach($result as $item){
-				$link = Widget::Anchor($item['value'], sprintf('%s/publish/%s/edit/%d/', SYMPHONY_URL, $item['section_handle'], $item['id']));
+				$link = Widget::Anchor(is_null($item['value']) ? '' : $item['value'], sprintf('%s/publish/%s/edit/%d/', SYMPHONY_URL, $item['section_handle'], $item['id']));
 				$output .= $link->generate() . ' ';
 			}
 
