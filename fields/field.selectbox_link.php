@@ -2,8 +2,9 @@
 
 	if(!defined('__IN_SYMPHONY__')) die('<h2>Symphony Error</h2><p>You cannot directly access this file</p>');
 
-	Class fieldSelectBox_Link extends Field {
+	require_once FACE . '/interface.exportablefield.php';
 
+	Class fieldSelectBox_Link extends Field implements ExportableField {
 		private static $cache = array();
 
 	/*-------------------------------------------------------------------------
@@ -529,6 +530,89 @@
 			}
 
 			return trim($output);
+		}
+
+	/*-------------------------------------------------------------------------
+		Export:
+	-------------------------------------------------------------------------*/
+
+		/**
+		 * Return a list of supported export modes for use with `prepareExportValue`.
+		 *
+		 * @return array
+		 */
+		public function getExportModes() {
+			return array(
+				'listEntry' =>			ExportableField::LIST_OF
+										^ ExportableField::ENTRY,
+				'listEntryObject' =>	ExportableField::LIST_OF
+										^ ExportableField::ENTRY
+										^ ExportableField::OBJECT,
+				'listEntryToValue'	=>	ExportableField::LIST_OF
+										^ ExportableField::ENTRY
+										^ ExportableField::VALUE,
+				'listValue' =>			ExportableField::LIST_OF
+										^ ExportableField::VALUE
+			);
+		}
+
+		/**
+		 * Give the field some data and ask it to return a value using one of many
+		 * possible modes.
+		 *
+		 * @param mixed $data
+		 * @param integer $mode
+		 * @param integer $entry_id
+		 * @return array|null
+		 */
+		public function prepareExportValue($data, $mode, $entry_id = null) {
+			$modes = (object)$this->getExportModes();
+
+			if (isset($data['relation_id']) === false) return null;
+
+			if (is_array($data['relation_id']) === false) {
+				$data['relation_id'] = array(
+					$data['relation_id']
+				);
+			}
+
+			// Return the entry IDs:
+			if ($mode === $modes->listEntry) {
+				return $data['relation_id'];
+			}
+
+			// Return entry objects:
+			if ($mode === $modes->listEntryObject) {
+				$items = array();
+
+				foreach ($data['relation_id'] as $entry_id) {
+					$entry = EntryManager::fetch($entry_id);
+
+					if (is_array($entry) === false || empty($entry)) continue;
+
+					$items[] = current($entry);
+				}
+
+				return $items;
+			}
+
+			// All other modes require full data:
+			$data = $this->findRelatedValues($data['relation_id']);
+			$items = array();
+
+			foreach ($data as $item) {
+				$item = (object)$item;
+
+				if ($mode === $modes->listValue) {
+					$items[] = $item->value;
+				}
+
+				else if ($mode === $modes->listEntryToValue) {
+					$items[$item->id] = $item->value;
+				}
+			}
+
+			return $items;
 		}
 
 	/*-------------------------------------------------------------------------
