@@ -497,7 +497,7 @@
 		}
 
 		public function getParameterPoolValue(array $data, $entry_id=NULL){
-			return $data['relation_id'];
+			return $this->prepareExportValue($data, ExportableField::LIST_OF + ExportableField::ENTRY, $entry_id);
 		}
 
 		public function prepareTableValue($data, XMLElement $link = null, $entry_id = null) {
@@ -544,15 +544,15 @@
 		public function getExportModes() {
 			return array(
 				'listEntry' =>			ExportableField::LIST_OF
-										^ ExportableField::ENTRY,
+										+ ExportableField::ENTRY,
 				'listEntryObject' =>	ExportableField::LIST_OF
-										^ ExportableField::ENTRY
-										^ ExportableField::OBJECT,
-				'listEntryToValue'	=>	ExportableField::LIST_OF
-										^ ExportableField::ENTRY
-										^ ExportableField::VALUE,
+										+ ExportableField::ENTRY
+										+ ExportableField::OBJECT,
+				'listEntryToValue' =>	ExportableField::LIST_OF
+										+ ExportableField::ENTRY
+										+ ExportableField::VALUE,
 				'listValue' =>			ExportableField::LIST_OF
-										^ ExportableField::VALUE
+										+ ExportableField::VALUE
 			);
 		}
 
@@ -582,12 +582,11 @@
 			}
 
 			// Return entry objects:
-			if ($mode === $modes->listEntryObject) {
+			else if ($mode === $modes->listEntryObject) {
 				$items = array();
 
-				foreach ($data['relation_id'] as $entry_id) {
-					$entry = EntryManager::fetch($entry_id);
-
+				$entries = EntryManager::fetch($entry_id);
+				foreach ($entries as $entry) {
 					if (is_array($entry) === false || empty($entry)) continue;
 
 					$items[] = current($entry);
