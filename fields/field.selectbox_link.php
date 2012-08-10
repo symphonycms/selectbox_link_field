@@ -585,7 +585,7 @@
 			else if ($mode === $modes->listEntryObject) {
 				$items = array();
 
-				$entries = EntryManager::fetch($entry_id);
+				$entries = EntryManager::fetch($data['relation_id']);
 				foreach ($entries as $entry) {
 					if (is_array($entry) === false || empty($entry)) continue;
 
