@@ -267,13 +267,33 @@
 					EntryManager::setFetchSorting('date', 'DESC');
 					$entries = EntryManager::fetch(array_values($entry_data), $section_id, null, null, null, null, false, true, $schema);
 
-					// 5. Loop over the Entries, passing the data to Field->prepareTableValue
-					foreach($entries as $entry) {
+					foreach ($entries as $entry) {
+						$field_data = $entry->getData($field->get('id'));
+
+						if (is_array($field_data) === false || empty($field_data)) continue;
+
+						// The field is exportable:
+						if (
+							$field instanceof ExportableField
+							&& in_array(ExportableField::UNFORMATTED, $field->getExportModes())
+						) {
+							$value = $field->prepareExportValue(
+								$field_data, ExportableField::UNFORMATTED, $entry->get('id')
+							);
+						}
+
+						// Nasty hack:
+						else {
+							$value = $field->getParameterPoolValue(
+								$field_data, $entry->get('id')
+							);
+						}
+
 						$relation_data[] = array(
-							'id' => $entry->get('id'),
-							'section_handle' => $section_info[$section_id]['handle'],
-							'section_name' => $section_info[$section_id]['name'],
-							'value' => $field->getParameterPoolValue($entry->getData($field->get('id')), $entry->get('id'))
+							'id' =>				$entry->get('id'),
+							'section_handle' =>	$section_info[$section_id]['handle'],
+							'section_name' =>	$section_info[$section_id]['name'],
+							'value' =>			$value
 						);
 					}
 				}
