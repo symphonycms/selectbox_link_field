@@ -3,8 +3,9 @@
 	if(!defined('__IN_SYMPHONY__')) die('<h2>Symphony Error</h2><p>You cannot directly access this file</p>');
 
 	require_once FACE . '/interface.exportablefield.php';
+	require_once FACE . '/interface.importablefield.php';
 
-	Class fieldSelectBox_Link extends Field implements ExportableField {
+	class FieldSelectBox_Link extends Field implements ExportableField, ImportableField {
 		private static $cache = array();
 
 	/*-------------------------------------------------------------------------
@@ -553,6 +554,35 @@
 		}
 
 	/*-------------------------------------------------------------------------
+		Import:
+	-------------------------------------------------------------------------*/
+
+		/**
+		 * Give the field some data and ask it to return a value.
+		 *
+		 * @param mixed $data
+		 * @param integer $entry_id
+		 * @return string|null
+		 */
+		public function prepareImportValue($data, $entry_id = null) {
+			if (empty($data)) return null;
+
+			if (!is_array($data)) {
+				return array(
+					'relation_id' => $data
+				);
+			}
+
+			$result = array();
+
+			foreach ($data as $a => $value) {
+				$result['relation_id'][] = (int)$data[$a];
+			}
+
+			return $result;
+		}
+
+	/*-------------------------------------------------------------------------
 		Export:
 	-------------------------------------------------------------------------*/
 
@@ -563,6 +593,7 @@
 		 */
 		public function getExportModes() {
 			return array(
+				'getPostdata' =>		ExportableField::POSTDATA,
 				'listEntry' =>			ExportableField::LIST_OF
 										+ ExportableField::ENTRY,
 				'listEntryObject' =>	ExportableField::LIST_OF
@@ -596,8 +627,13 @@
 				);
 			}
 
+			// Return postdata:
+			if ($mode === $modes->getPostdata) {
+				return $data;
+			}
+
 			// Return the entry IDs:
-			if ($mode === $modes->listEntry) {
+			else if ($mode === $modes->listEntry) {
 				return $data['relation_id'];
 			}
 
