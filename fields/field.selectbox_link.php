@@ -225,7 +225,7 @@
 			$relation_id = array_filter($relation_id);
 			if(empty($relation_id)) return array();
 
-			$hash = md5(serialize($relation_id));
+			$hash = md5(serialize($relation_id).$this->get('element_name'));
 
 			if(!isset(self::$cache[$hash]['relation_data'])) {
 				$relation_ids = Symphony::Database()->fetch(sprintf("
