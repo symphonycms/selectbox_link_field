@@ -706,6 +706,7 @@
 					$data[0] = preg_replace('/^not:/', null, $data[0]);
 					$negation = true;
 				}
+				// Has no effect when $andOperation is false
 				else if(preg_match('/^sql-null-or-not:/', $data[0])) {
 					$data[0] = preg_replace('/^sql-null-or-not:/', null, $data[0]);
 					$negation = true;
@@ -764,14 +765,7 @@
 					$condition = ($negation) ? 'NOT EXISTS' : 'EXISTS';
 					$where .= " AND $condition (
 						SELECT * FROM `tbl_entries_data_$field_id` AS `t$field_id` WHERE `t$field_id`.entry_id = `e`.id AND `t$field_id`.relation_id IN (".implode(", ", $data).")
-					";
-
-					if($null) {
-						$where .= " OR `t$field_id`.`relation_id` IS NULL) ";
-					}
-					else {
-						$where .= ") ";
-					}
+					)";
 				}
 
 			}
