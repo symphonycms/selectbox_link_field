@@ -409,9 +409,7 @@
 			$fields['limit'] = max(1, (int)$this->get('limit'));
 			$fields['related_field_id'] = implode(',', $this->get('related_field_id'));
 
-			Symphony::Database()->delete("tbl_fields_" . $this->handle(), "`field_id` = '$id'");
-
-			if(!Symphony::Database()->insert($fields, 'tbl_fields_' . $this->handle())) return false;
+			if(!FieldManager::saveSettings($id, $fields)) return false;
 
 			$this->removeSectionAssociation($id);
 			foreach($this->get('related_field_id') as $field_id){
