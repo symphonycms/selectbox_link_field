@@ -761,10 +761,9 @@
 					}
 				}
 				else {
-					$condition = ($negation) ? 'NOT EXISTS' : 'EXISTS';
-					$where .= " AND $condition (
-						SELECT * FROM `tbl_entries_data_$field_id` AS `t$field_id` WHERE `t$field_id`.entry_id = `e`.id AND `t$field_id`.relation_id IN (".implode(", ", $data).")
-					";
+					$condition = ($negation) ? 'NOT IN' : 'IN';
+					$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id` ON (`e`.`id` = `t$field_id`.entry_id) ";
+					$where .= " AND (`t$field_id`.relation_id $condition ('".implode("', '", $data)."') ";
 
 					if($null) {
 						$where .= " OR `t$field_id`.`relation_id` IS NULL) ";
