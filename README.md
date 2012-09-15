@@ -1,8 +1,8 @@
 # Select Box Link Field
 
-- Version: 1.23
+- Version: 1.24
 - Author: Symphony Team
-- Release Date: 22nd May 2012
+- Release Date: 16th September 2012
 - Requirements: Symphony 2.3 or greater
 
 ## Installation
