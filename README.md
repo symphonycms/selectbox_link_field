@@ -3,7 +3,7 @@
 - Version: 1.24
 - Author: Symphony Team
 - Release Date: 16th September 2012
-- Requirements: Symphony 2.3 or greater
+- Requirements: Symphony 2.3.1 or greater
 
 ## Installation
 

@@ -535,7 +535,7 @@
 			if(!is_null($link)){
 				$label = '';
 				foreach($result as $item){
-					$label .= ' ' . $item['value'];
+					$label .= ', ' . $item['value'];
 				}
 				$link->setValue(General::sanitize(trim($label)));
 				return $link->generate();
@@ -545,10 +545,10 @@
 
 			foreach($result as $item){
 				$link = Widget::Anchor(is_null($item['value']) ? '' : $item['value'], sprintf('%s/publish/%s/edit/%d/', SYMPHONY_URL, $item['section_handle'], $item['id']));
-				$output .= $link->generate() . ' ';
+				$output .= $link->generate() . ', ';
 			}
 
-			return trim($output);
+			return trim($output, ', ');
 		}
 
 	/*-------------------------------------------------------------------------
