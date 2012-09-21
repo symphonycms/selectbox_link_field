@@ -721,8 +721,8 @@
 
 						foreach($related_field_ids as $related_field_id) {
 							try {
-								$return = Symphony::Database()->fetchCol("id", sprintf(
-									"SELECT
+								$return = Symphony::Database()->fetchCol("id", sprintf("
+									SELECT
 										`entry_id` as `id`
 									FROM
 										`tbl_entries_data_%d`
@@ -731,7 +731,8 @@
 									LIMIT 1", $related_field_id, Lang::createHandle($value)
 								));
 
-								// Skipping returns wrong results when doing an AND operation, return 0 instead.
+								// Skipping returns wrong results when doing an
+								// AND operation, return 0 instead.
 								if(!empty($return)) {
 									$id = $return[0];
 									break;
@@ -762,17 +763,25 @@
 				}
 				else {
 					$condition = ($negation) ? 'NOT IN' : 'IN';
-					$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id` ON (`e`.`id` = `t$field_id`.entry_id) ";
-					$where .= " AND (`t$field_id`.relation_id $condition ('".implode("', '", $data)."') ";
 
-					if($null) {
-						$where .= " OR `t$field_id`.`relation_id` IS NULL) ";
+					// Apply a different where condition if we are using $negation. RE: #29
+					if($negation) {
+						$condition = 'NOT EXISTS';
+						$where .= " AND $condition (
+							SELECT *
+							FROM `tbl_entries_data_$field_id` AS `t$field_id`
+							WHERE `t$field_id`.entry_id = `e`.id AND `t$field_id`.relation_id IN (".implode(", ", $data).")
+						)";
 					}
+					// Normal filtering
 					else {
-						$where .= ") ";
+						$joins .= " LEFT JOIN `tbl_entries_data_$field_id` AS `t$field_id` ON (`e`.`id` = `t$field_id`.entry_id) ";
+						$where .= " AND (`t$field_id`.relation_id $condition ('".implode("', '", $data)."') ";
+
+						// If we want entries with null values included in the result
+						$where .= ($null) ? " OR `t$field_id`.`relation_id` IS NULL) " : ") ";
 					}
 				}
-
 			}
 
 			return true;
