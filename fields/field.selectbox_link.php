@@ -82,7 +82,7 @@
 
 			// find the sections of the related fields
 			$sections = Symphony::Database()->fetch("
-				SELECT DISTINCT (s.id), s.name, f.id as `field_id`
+				SELECT DISTINCT (s.id), f.id as `field_id`
 				FROM `tbl_sections` AS `s`
 				LEFT JOIN `tbl_fields` AS `f` ON `s`.id = `f`.parent_section
 				WHERE `f`.id IN ('" . implode("','", $this->get('related_field_id')) . "')
@@ -90,16 +90,16 @@
 			");
 
 			if(is_array($sections) && !empty($sections)){
-				foreach($sections as $section) {
+				foreach($sections as $_section) {
+					$section = SectionManager::fetch($_section['id']);
 					$group = array(
-						'name' => $section['name'],
-						'section' => $section['id'],
+						'name' => $section->get('name'),
+						'section' => $section->get('id'),
 						'values' => array()
 					);
 
-					// build a list of entry IDs with the correct sort order
-					EntryManager::setFetchSorting('date', 'DESC');
-					$entries = EntryManager::fetch(NULL, $section['id'], $limit, 0, null, null, false, false);
+					EntryManager::setFetchSorting($section->getSortingField(), $section->getSortingOrder());
+					$entries = EntryManager::fetch(NULL, $section->get('id'), $limit, 0, null, null, false, false);
 
 					$results = array();
 					foreach($entries as $entry) {
@@ -108,7 +108,7 @@
 
 					// if a value is already selected, ensure it is added to the list (if it isn't in the available options)
 					if(!is_null($existing_selection) && !empty($existing_selection)){
-						$entries_for_field = $this->findEntriesForField($existing_selection, $section['field_id']);
+						$entries_for_field = $this->findEntriesForField($existing_selection, $_section['field_id']);
 						$results = array_merge($results, $entries_for_field);
 					}
 
@@ -233,7 +233,6 @@
 					FROM `tbl_entries` AS `e`
 					LEFT JOIN `tbl_sections` AS `s` ON (s.id = e.section_id)
 					WHERE e.id IN (%s)
-					ORDER BY `e`.creation_date DESC
 					",
 					implode(',', $relation_id)
 				));
@@ -265,7 +264,8 @@
 						}
 					}
 
-					EntryManager::setFetchSorting('date', 'DESC');
+					$section = SectionManager::fetch($section_id);
+					EntryManager::setFetchSorting($section->getSortingField(), $section->getSortingOrder());
 					$entries = EntryManager::fetch(array_values($entry_data), $section_id, null, null, null, null, false, true, $schema);
 
 					foreach ($entries as $entry) {
@@ -365,7 +365,7 @@
 			$label->setAttribute('class', 'column');
 			$input = Widget::Input('fields['.$this->get('sortorder').'][limit]', (string)$this->get('limit'));
 			$input->setAttribute('size', '3');
-			$label->setValue(__('Limit to the %s most recent entries', array($input->generate())));
+			$label->setValue(__('Limit to %s entries', array($input->generate())));
 			$wrapper->appendChild($label);
 
 			// Allow selection of multiple items
