@@ -3,11 +3,11 @@
 	$about = array(
 		'name' => 'Русский',
 		'author' => array(
-			'name' => 'Igor Bogdanov',
-			'email' => 'i.bogdanov@ibcico.com',
-			'website' => false
+			'name' => 'Александр Бирюков',
+			'email' => 'info@alexbirukov.ru',
+			'website' => 'http://alexbirukov.ru'
 		),
-		'release-date' => '2009-11-27'
+		'release-date' => '2012-12-10'
 	);
 	
 	
@@ -19,10 +19,10 @@
 	$dictionary = array(
 	
 		'Select Box Link' => 
-		'Ссылка на сущность',
+		'Ссылка на запись',
 		
 		'None' =>
-		false,
+		'Нет',
 
 		'Options' => 
 		'Опции',
