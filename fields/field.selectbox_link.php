@@ -265,6 +265,8 @@
 					}
 
 					$section = SectionManager::fetch($section_id);
+					if(($section instanceof Section) === false) continue;
+
 					EntryManager::setFetchSorting($section->getSortingField(), $section->getSortingOrder());
 					$entries = EntryManager::fetch(array_values($entry_data), $section_id, null, null, null, null, false, true, $schema);
 
@@ -535,9 +537,9 @@
 			if(!is_null($link)){
 				$label = '';
 				foreach($result as $item){
-					$label .= ', ' . $item['value'];
+					$label .= $item['value'] . ', ';
 				}
-				$link->setValue(General::sanitize(trim($label)));
+				$link->setValue(General::sanitize(trim($label, ', ')));
 				return $link->generate();
 			}
 
