@@ -470,11 +470,15 @@
 
 		public function processRawFieldData($data, &$status, &$message=null, $simulate=false, $entry_id=null) {
 			$status = self::__OK__;
-
-			if(!is_array($data)) return array('relation_id' => $data);
-			if(empty($data)) return null;
-
 			$result = array();
+
+			if(!is_array($data)) {
+				return array('relation_id' => (int)$data);
+			}
+
+			if(empty($data)) {
+				return null;
+			}
 
 			foreach($data as $a => $value) {
 				$result['relation_id'][] = (int)$data[$a];
@@ -557,29 +561,33 @@
 		Import:
 	-------------------------------------------------------------------------*/
 
-		/**
-		 * Give the field some data and ask it to return a value.
-		 *
-		 * @param mixed $data
-		 * @param integer $entry_id
-		 * @return string|null
-		 */
-		public function prepareImportValue($data, $entry_id = null) {
-			if (empty($data)) return null;
+		public function getImportModes() {
+			return array(
+				'getValue' =>		ImportableField::STRING_VALUE,
+				'getPostdata' =>	ImportableField::ARRAY_VALUE
+			);
+		}
 
-			if (!is_array($data)) {
-				return array(
-					'relation_id' => $data
-				);
+		public function prepareImportValue($data, $mode, $entry_id = null) {
+			$message = null;
+			$modes = (object)$this->getImportModes();
+
+			if(!is_array($data)) {
+				$data = array($data);
 			}
 
-			$result = array();
+			if($mode === $modes->getValue) {
+				if ($this->get('allow_multiple_selection') === 'no') {
+					$data = array(implode('', $data));
+				}
 
-			foreach ($data as $a => $value) {
-				$result['relation_id'][] = (int)$data[$a];
+				return implode($data);
+			}
+			else if($mode === $modes->getPostdata) {
+				return $this->processRawFieldData($data, Field::__OK__, $message, true, $entry_id);
 			}
 
-			return $result;
+			return null;
 		}
 
 	/*-------------------------------------------------------------------------
