@@ -129,7 +129,11 @@
 		public function getToggleStates(){
 			$options = $this->findOptions();
 			$output = $options[0]['values'];
-			$output[""] = __('None');
+
+			if($this->get('required') !== 'yes') {
+				$output[""] = __('None');
+			}
+
 			return $output;
 		}
 
