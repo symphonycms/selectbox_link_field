@@ -1,9 +1,9 @@
 # Select Box Link Field
 
-- Version: 1.25
+- Version: 1.26
 - Author: Symphony Team
-- Release Date: 29th October 2012
-- Requirements: Symphony 2.3.1 or greater
+- Release Date: 22nd February 2012
+- Requirements: Symphony 2.3.2 or greater
 
 ## Installation
 
@@ -13,8 +13,7 @@
 
 ## Updating
 
-1. Be sure to visit the Extension page in the Symphony admin and
-   enable "Select Box Link Field" so the database is updated accordingly.
+1. Be sure to visit the Extension page in the Symphony admin and enable "Select Box Link Field" so the database is updated accordingly.
 
 ## Usage
 

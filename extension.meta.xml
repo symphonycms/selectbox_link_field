@@ -14,6 +14,11 @@
 		</author>
 	</authors>
 	<releases>
+		<release version="1.26" date="2013-02-22" min="2.3.2">
+			- Implement the updated `ImportableField` interface
+			- Updated Russian language
+			- Handle sections that no longer exist
+		</release>
 		<release version="1.25" date="2012-10-29" min="2.3.1">
 			- [#30](https://github.com/symphonycms/selectbox_link_field/issues/30) Separate multiple values in the backend publish tables.
 			- [#29](https://github.com/symphonycms/selectbox_link_field/issues/29) Apply alternate SQL query for not: filters.
