@@ -21,6 +21,7 @@
 			// Default settings
 			$this->set('show_column', 'no');
 			$this->set('show_association', 'yes');
+			$this->set('hide_when_prepopulated', 'no');
 			$this->set('required', 'yes');
 			$this->set('limit', 20);
 			$this->set('related_field_id', array());
@@ -366,13 +367,25 @@
 			}
 			else $wrapper->appendChild($label);
 
+			$div = new XMLElement('div', NULL, array('class' => 'two columns'));
+
 			// Maximum entries
 			$label = Widget::Label();
 			$label->setAttribute('class', 'column');
 			$input = Widget::Input('fields['.$this->get('sortorder').'][limit]', (string)$this->get('limit'));
 			$input->setAttribute('size', '3');
 			$label->setValue(__('Limit to %s entries', array($input->generate())));
-			$wrapper->appendChild($label);
+			$div->appendChild($label);
+
+			// Hide when prepopulated
+			$label = Widget::Label();
+			$label->setAttribute('class', 'column');
+			$input = Widget::Input('fields['.$this->get('sortorder').'][hide_when_prepopulated]', 'yes', 'checkbox');
+			if($this->get('hide_when_prepopulated') == 'yes') $input->setAttribute('checked', 'checked');
+			$label->setValue($input->generate() . ' ' . __('Hide when prepopulated'));
+			$div->appendChild($label);
+
+			$wrapper->appendChild($div);
 
 			// Allow selection of multiple items
 			$label = Widget::Label();
@@ -412,6 +425,7 @@
 			if($this->get('related_field_id') != '') $fields['related_field_id'] = $this->get('related_field_id');
 			$fields['allow_multiple_selection'] = $this->get('allow_multiple_selection') ? $this->get('allow_multiple_selection') : 'no';
 			$fields['show_association'] = $this->get('show_association') == 'yes' ? 'yes' : 'no';
+			$fields['hide_when_prepopulated'] = $this->get('hide_when_prepopulated') == 'yes' ? 'yes' : 'no';
 			$fields['limit'] = max(1, (int)$this->get('limit'));
 			$fields['related_field_id'] = implode(',', $this->get('related_field_id'));
 
