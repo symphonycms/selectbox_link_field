@@ -831,24 +831,38 @@
 
 			foreach($records as $r){
 				$data = $r->getData($this->get('id'));
-				$value = $data['relation_id'];
+				$value = (int)$data['relation_id'];
 
-				$related_data = EntryManager::fetch($value, $field->get('parent_section'), 1, null, null, null, false, true, array($field->get('element_name')));
-				$related_data = current($related_data);
+				if($value === 0) {
+					if(!isset($groups[$this->get('element_name')][$value])){
+						$groups[$this->get('element_name')][$value] = array(
+							'attr' => array(
+								'link-handle' => 'none',
+								'value' => "None"
+							),
+							'records' => array(),
+							'groups' => array()
+						);
+					}
+				}
+				else {
+					$related_data = EntryManager::fetch($value, $field->get('parent_section'), 1, null, null, null, false, true, array($field->get('element_name')));
+					$related_data = current($related_data);
 
-				if(!$related_data instanceof Entry) continue;
+					if(!$related_data instanceof Entry) continue;
 
-				$primary_field = $field->prepareTableValue($related_data->getData($related_field_id));
+					$primary_field = $field->prepareTableValue($related_data->getData($related_field_id));
 
-				if(!isset($groups[$this->get('element_name')][$value])){
-					$groups[$this->get('element_name')][$value] = array(
-						'attr' => array(
-							'link-id' => $data['relation_id'],
-							'link-handle' => Lang::createHandle($primary_field),
-							'value' => General::sanitize($primary_field)),
-						'records' => array(),
-						'groups' => array()
-					);
+					if(!isset($groups[$this->get('element_name')][$value])){
+						$groups[$this->get('element_name')][$value] = array(
+							'attr' => array(
+								'link-id' => $data['relation_id'],
+								'link-handle' => Lang::createHandle($primary_field),
+								'value' => General::sanitize($primary_field)),
+							'records' => array(),
+							'groups' => array()
+						);
+					}
 				}
 
 				$groups[$this->get('element_name')][$value]['records'][] = $r;
