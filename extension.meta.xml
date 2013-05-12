@@ -14,8 +14,10 @@
 		</author>
 	</authors>
 	<releases>
-		<release version="1.27" date="2013-05-09" min="2.3.3">
-			- Add functionality to hide field in a prepopulated state
+		<release version="1.27" date="2013-05-12" min="2.3.3">
+			- [#36](https://github.com/symphonycms/selectbox_link_field/issues/36) Add functionality to hide field in a prepopulated state
+			- [#35](https://github.com/symphonycms/selectbox_link_field/issues/35) Handle grouping on null values better
+			- When importing into the SBL field, if the data given is not entry ID's, attempt to find the entry ID's assuming the value we've been given is handles or values
 		</release>
 		<release version="1.26" date="2013-02-22" min="2.3.2">
 			- Implement the updated `ImportableField` interface
