@@ -316,6 +316,48 @@
 			return $relation_data;
 		}
 
+		/**
+		 * Given a string (assumed to be a handle or value), this function
+		 * will do a lookup to field the `entry_id` from the related fields
+		 * of the field and returns the `entry_id`.
+		 *
+		 * @since 1.27
+		 * @param string $value
+		 * @return integer
+		 */
+		public function fetchIDfromValue($value) {
+			$id = null;
+			$related_field_ids = $this->get('related_field_id');
+
+			foreach($related_field_ids as $related_field_id) {
+				try {
+					$return = Symphony::Database()->fetchCol("id", sprintf("
+						SELECT
+							`entry_id` as `id`
+						FROM
+							`tbl_entries_data_%d`
+						WHERE
+							`handle` = '%s'
+						LIMIT 1", $related_field_id, Lang::createHandle($value)
+					));
+
+					// Skipping returns wrong results when doing an
+					// AND operation, return 0 instead.
+					if(!empty($return)) {
+						$id = $return[0];
+						break;
+					}
+				} catch (Exception $ex) {
+					// Do nothing, this would normally be the case when a handle
+					// column doesn't exist!
+				}
+			}
+
+			$value = (is_null($id)) ? 0 : (int)$id;
+
+			return $value;
+		}
+
 	/*-------------------------------------------------------------------------
 		Settings:
 	-------------------------------------------------------------------------*/
@@ -602,6 +644,14 @@
 				return implode($data);
 			}
 			else if($mode === $modes->getPostdata) {
+				// Iterate over $data, and where the value is not an ID,
+				// do a lookup for it!
+				foreach($data as $key => &$value) {
+					if(!is_numeric($value) && !is_null($value)){
+						$value = $this->fetchIDfromValue($value);
+					}
+				}
+
 				return $this->processRawFieldData($data, $status, $message, true, $entry_id);
 			}
 
@@ -744,34 +794,7 @@
 					// for now, I assume string values are the only possible handles.
 					// of course, this is not entirely true, but I find it good enough.
 					if(!is_numeric($value) && !is_null($value)){
-						$related_field_ids = $this->get('related_field_id');
-						$id = null;
-
-						foreach($related_field_ids as $related_field_id) {
-							try {
-								$return = Symphony::Database()->fetchCol("id", sprintf("
-									SELECT
-										`entry_id` as `id`
-									FROM
-										`tbl_entries_data_%d`
-									WHERE
-										`handle` = '%s'
-									LIMIT 1", $related_field_id, Lang::createHandle($value)
-								));
-
-								// Skipping returns wrong results when doing an
-								// AND operation, return 0 instead.
-								if(!empty($return)) {
-									$id = $return[0];
-									break;
-								}
-							} catch (Exception $ex) {
-								// Do nothing, this would normally be the case when a handle
-								// column doesn't exist!
-							}
-						}
-
-						$value = (is_null($id)) ? 0 : $id;
+						$value = $this->fetchIDfromValue($value);
 					}
 				}
 
