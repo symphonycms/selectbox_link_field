@@ -14,6 +14,10 @@
 		</author>
 	</authors>
 	<releases>
+		<release version="1.28" date="2013-07-01" min="2.3.3">
+			- Add Finnish and Polish translations
+			- Update links to **getsymphony.com**
+		</release>
 		<release version="1.27" date="2013-05-12" min="2.3.3">
 			- [#36](https://github.com/symphonycms/selectbox_link_field/issues/36) Add functionality to hide field in a prepopulated state
 			- [#35](https://github.com/symphonycms/selectbox_link_field/issues/35) Handle grouping on null values better
