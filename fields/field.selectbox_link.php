@@ -280,7 +280,7 @@
 
 						if (is_array($field_data) === false || empty($field_data)) continue;
 
-						// The field is exportable:
+						// Get unformatted content:
 						if (
 							$field instanceof ExportableField
 							&& in_array(ExportableField::UNFORMATTED, $field->getExportModes())
@@ -290,7 +290,17 @@
 							);
 						}
 
-						// Nasty hack:
+						// Get values:
+						if (
+							$field instanceof ExportableField
+							&& in_array(ExportableField::VALUE, $field->getExportModes())
+						) {
+							$value = $field->prepareExportValue(
+								$field_data, ExportableField::VALUE, $entry->get('id')
+							);
+						}
+						
+						// Handle fields that are not exportable:
 						else {
 							$value = $field->getParameterPoolValue(
 								$field_data, $entry->get('id')
