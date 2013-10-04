@@ -280,7 +280,7 @@
 
 						if (is_array($field_data) === false || empty($field_data)) continue;
 
-						// The field is exportable:
+						// Get unformatted content:
 						if (
 							$field instanceof ExportableField
 							&& in_array(ExportableField::UNFORMATTED, $field->getExportModes())
@@ -290,7 +290,17 @@
 							);
 						}
 
-						// Nasty hack:
+						// Get values:
+						if (
+							$field instanceof ExportableField
+							&& in_array(ExportableField::VALUE, $field->getExportModes())
+						) {
+							$value = $field->prepareExportValue(
+								$field_data, ExportableField::VALUE, $entry->get('id')
+							);
+						}
+						
+						// Handle fields that are not exportable:
 						else {
 							$value = $field->getParameterPoolValue(
 								$field_data, $entry->get('id')
@@ -504,8 +514,12 @@
 			if(!empty($states)){
 				foreach($states as $s){
 					$group = array('label' => $s['name'], 'options' => array());
-					foreach($s['values'] as $id => $v){
-						$group['options'][] = array($id, in_array($id, $entry_ids), General::sanitize($v));
+					if (count($s['values']) == 0) {
+						$group['options'][] = array(null, false, __('None found.'), null, null, array('disabled' => 'disabled'));
+					} else {
+						foreach($s['values'] as $id => $v){
+							$group['options'][] = array($id, in_array($id, $entry_ids), General::sanitize($v));
+						}
 					}
 					$options[] = $group;
 				}
