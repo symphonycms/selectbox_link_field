@@ -7,7 +7,7 @@
 			'email' => 'info@alexbirukov.ru',
 			'website' => 'http://alexbirukov.ru'
 		),
-		'release-date' => '2012-12-11'
+		'release-date' => '2013-10-04'
 	);
 
 	/**
@@ -18,22 +18,16 @@
 		'Allow selection of multiple options' => 
 		'Разрешить выбор нескольких опций.',
 
+		'Limit to %s entries' => 
+		'Лимит записей %s',
+
 		'Select Box Link' => 
 		'Ссылка на запись',
-
-		'Limit to the %s most recent entries' => 
-		'Ограничение на %s последних записей.',
-
-		'None' => 
-		'Нет',
-
-		'Options' => 
-		'Опции',
 
 		'Values' => 
 		'Значения',
 
-		'Limit to %s entries' => 
-		'Лимит записей %s',
+		'Hide when prepopulated' => 
+		'Скрывать при предварительном формировании',
 
 	);
