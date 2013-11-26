@@ -547,15 +547,10 @@
 			$result = array();
 
 			if(!is_array($data)) {
-				return array('relation_id' => (int)$data);
+				$result['relation_id'] = ((int)$data === 0) ? null : (int)$data;
 			}
-
-			if(empty($data)) {
-				return null;
-			}
-
-			foreach($data as $a => $value) {
-				$result['relation_id'][] = (int)$data[$a];
+			else foreach($data as $a => $value) {
+				$result['relation_id'][] = ((int)$data[$a] === 0) ? null : (int)$data[$a];
 			}
 
 			return $result;
