@@ -759,7 +759,7 @@
 		Filtering:
 	-------------------------------------------------------------------------*/
 
-		public function buildDSRetrievalSQL($data, &$joins, &$where, $andOperation = false) {
+		public function buildDSRetrivalSQL($data, &$joins, &$where, $andOperation = false) {
 			return $this->buildDSRetrievalSQL($data, $joins, $where, $andOperation);
 		}
 
