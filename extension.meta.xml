@@ -14,6 +14,12 @@
 		</author>
 	</authors>
 	<releases>
+		<release version="1.29" date="2014-03-01" min="2.3.3">
+			- [#18](https://github.com/symphonycms/selectbox_link_field/issues/18) Show a message when there are no entries in a section
+			- Correctly fetch file name and other values using the Exportable interface
+			- Revert to saving NULL instead of 0 when no value is selected
+			- Updated Russian translation
+		</release>
 		<release version="1.28" date="2013-07-01" min="2.3.3">
 			- Add Finnish and Polish translations
 			- Update links to **getsymphony.com**
