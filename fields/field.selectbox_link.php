@@ -72,7 +72,7 @@
 			if($field == 'related_field_id' && !is_array($value)){
 				$value = explode(',', $value);
 			}
-			$this->_fields[$field] = $value;
+			$this->_settings[$field] = $value;
 		}
 
 		public function findOptions(array $existing_selection=NULL){
@@ -758,10 +758,6 @@
 	/*-------------------------------------------------------------------------
 		Filtering:
 	-------------------------------------------------------------------------*/
-
-		public function buildDSRetrivalSQL($data, &$joins, &$where, $andOperation = false) {
-			return $this->buildDSRetrievalSQL($data, $joins, $where, $andOperation);
-		}
 
 		public function buildDSRetrievalSQL($data, &$joins, &$where, $andOperation=false){
 			$field_id = $this->get('id');
