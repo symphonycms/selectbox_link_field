@@ -116,6 +116,13 @@
 					if(is_array($results) && !empty($results)){
 						$related_values = $this->findRelatedValues($results);
 						foreach($related_values as $value){
+							// If this field permits multiple records per entry
+							// (or the data is corrupted), use the first record.
+							// This prevents a Symphony error and also prevent a case where
+							// The string `Array` was showing.
+							if (is_array($value['value'])) {
+								$value['value'] = $value['value'][0];
+							}
 							$group['values'][$value['id']] = $value['value'];
 						}
 					}
