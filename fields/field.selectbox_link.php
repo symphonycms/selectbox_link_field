@@ -133,7 +133,7 @@
 			$field_id = $this->findFieldIDFromRelationID($entry_id);
 
 			if (!isset(self::$cacheFields[$field_id])) {
-				self::$cacheFields[$field_id] = $this->Database->fetchRow(0, "
+				self::$cacheFields[$field_id] = $this->_engine->Database->fetchRow(0, "
 					SELECT
 						f.id,
 						s.name AS `section_name`,
@@ -159,7 +159,7 @@
 			$field = $fm->fetch($field_id);
 
 			if (!isset(self::$cacheValues[$entry_id])) {
-				self::$cacheValues[$entry_id] = $this->Database->fetchRow(0, sprintf("
+				self::$cacheValues[$entry_id] = $this->_engine->Database->fetchRow(0, sprintf("
 						SELECT *
 				 		FROM `tbl_entries_data_%d`
 				 		WHERE `entry_id` = %d
@@ -261,10 +261,10 @@
 
 			try{
 				## Figure out the section
-				$section_id = $this->Database->fetchVar('section_id', 0, "SELECT `section_id` FROM `tbl_entries` WHERE `id` = {$id} LIMIT 1");
+				$section_id = $this->_engine->Database->fetchVar('section_id', 0, "SELECT `section_id` FROM `tbl_entries` WHERE `id` = {$id} LIMIT 1");
 
 				## Figure out which related_field_id is from that section
-				$field_id = $this->Database->fetchVar('field_id', 0, "SELECT f.`id` AS `field_id`
+				$field_id = $this->_engine->Database->fetchVar('field_id', 0, "SELECT f.`id` AS `field_id`
 					FROM `tbl_fields` AS `f`
 					LEFT JOIN `tbl_sections` AS `s` ON f.parent_section = s.id
 					WHERE `s`.id = {$section_id} AND f.id IN ('".@implode("', '", $this->get('related_field_id'))."') LIMIT 1");
@@ -283,7 +283,7 @@
 			$limit = $this->get('limit');
 
 			// find the sections of the related fields
-			$sections = $this->Database->fetch("SELECT DISTINCT (s.id), s.name, f.id as `field_id`
+			$sections = $this->_engine->Database->fetch("SELECT DISTINCT (s.id), s.name, f.id as `field_id`
 				 								FROM `tbl_sections` AS `s`
 												LEFT JOIN `tbl_fields` AS `f` ON `s`.id = `f`.parent_section
 												WHERE `f`.id IN ('" . implode("','", $this->get('related_field_id')) . "')
@@ -295,7 +295,7 @@
 					$group = array('name' => $section['name'], 'section' => $section['id'], 'values' => array());
 
 					// build a list of entry IDs with the correct sort order
-					$entryManager = new EntryManager($this->_Parent->_Parent);
+					$entryManager = new EntryManager($this->_Parent);
 					$entries = $entryManager->fetch(NULL, $section['id'], $limit, 0);
 
 					$results = array();
@@ -376,15 +376,15 @@
 			$fields['limit'] = max(1, (int)$this->get('limit'));
 			$fields['related_field_id'] = implode(',', $this->get('related_field_id'));
 
-			$this->Database->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id'");
+			$this->_engine->Database->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id'");
 
-			if(!$this->Database->insert($fields, 'tbl_fields_' . $this->handle())) return false;
+			if(!$this->_engine->Database->insert($fields, 'tbl_fields_' . $this->handle())) return false;
 
 			//$sections = $this->get('related_field_id');
 
 			$this->removeSectionAssociation($id);
 
-			//$section_id = $this->Database->fetchVar('parent_section', 0, "SELECT `parent_section` FROM `tbl_fields` WHERE `id` = '".$fields['related_field_id']."' LIMIT 1");
+			//$section_id = $this->_engine->Database->fetchVar('parent_section', 0, "SELECT `parent_section` FROM `tbl_fields` WHERE `id` = '".$fields['related_field_id']."' LIMIT 1");
 
 			foreach($this->get('related_field_id') as $field_id){
 				$this->createSectionAssociation(NULL, $id, $field_id, $this->get('show_association') == 'yes' ? true : false);
