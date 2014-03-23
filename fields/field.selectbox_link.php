@@ -508,12 +508,19 @@
 					$group = array('label' => $s['name'], 'options' => array());
 					if (count($s['values']) == 0) {
 						$group['options'][] = array(null, false, __('None found.'), null, null, array('disabled' => 'disabled'));
-					} else {
+					} 
+					else {
 						foreach($s['values'] as $id => $v){
 							$group['options'][] = array($id, in_array($id, $entry_ids), General::sanitize($v));
 						}
 					}
-					$options[] = $group;
+
+					if(count($states) == 1) {
+						$options = array_merge($options, $group['options']);
+					}
+					else {
+						$options[] = $group;
+					}
 				}
 			}
 
