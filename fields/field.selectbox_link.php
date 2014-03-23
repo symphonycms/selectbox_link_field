@@ -417,41 +417,49 @@
 			if(isset($errors['related_field_id'])) {
 				$wrapper->appendChild(Widget::Error($label, $errors['related_field_id']));
 			}
-			else $wrapper->appendChild($label);
-
-			$div = new XMLElement('div', NULL, array('class' => 'two columns'));
+			else {
+				$wrapper->appendChild($label);
+			}
 
 			// Maximum entries
-			$label = Widget::Label();
-			$label->setAttribute('class', 'column');
+			$label = Widget::Label(__('Maximum entries'));
 			$input = Widget::Input('fields['.$this->get('sortorder').'][limit]', (string)$this->get('limit'));
-			$input->setAttribute('size', '3');
-			$label->setValue(__('Limit to %s entries', array($input->generate())));
-			$div->appendChild($label);
+			$label->appendChild($input);
+			$wrapper->appendChild($label);
 
-			// Hide when prepopulated
-			$label = Widget::Label();
-			$label->setAttribute('class', 'column');
-			$input = Widget::Input('fields['.$this->get('sortorder').'][hide_when_prepopulated]', 'yes', 'checkbox');
-			if($this->get('hide_when_prepopulated') == 'yes') $input->setAttribute('checked', 'checked');
-			$label->setValue($input->generate() . ' ' . __('Hide when prepopulated'));
-			$div->appendChild($label);
-
+			// Options
+			$div = new XMLElement('div', NULL, array('class' => 'two columns'));
 			$wrapper->appendChild($div);
 
 			// Allow selection of multiple items
 			$label = Widget::Label();
 			$label->setAttribute('class', 'column');
 			$input = Widget::Input('fields['.$this->get('sortorder').'][allow_multiple_selection]', 'yes', 'checkbox');
-			if($this->get('allow_multiple_selection') == 'yes') $input->setAttribute('checked', 'checked');
-			$label->setValue($input->generate() . ' ' . __('Allow selection of multiple options'));
 
-			$div = new XMLElement('div', NULL, array('class' => 'two columns'));
+			if($this->get('allow_multiple_selection') == 'yes') {
+				$input->setAttribute('checked', 'checked');
+			}
+
+			$label->setValue($input->generate() . ' ' . __('Allow selection of multiple options'));
 			$div->appendChild($label);
+
+			// Show associations
 			$this->appendShowAssociationCheckbox($div);
-			$this->appendRequiredCheckbox($div);
-			$this->appendShowColumnCheckbox($div);
-			$wrapper->appendChild($div);
+
+			// Hide when prepopulated
+			$label = Widget::Label();
+			$label->setAttribute('class', 'column');
+			$input = Widget::Input('fields['.$this->get('sortorder').'][hide_when_prepopulated]', 'yes', 'checkbox');
+
+			if($this->get('hide_when_prepopulated') == 'yes') {
+				$input->setAttribute('checked', 'checked');
+			}
+
+			$label->setValue($input->generate() . ' ' . __('Hide when prepopulated'));
+			$div->appendChild($label);
+
+			// Requirements and table display
+			$this->appendStatusFooter($wrapper);
 		}
 
 		public function checkFields(array &$errors, $checkForDuplicates = true) {
