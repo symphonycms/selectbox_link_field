@@ -123,7 +123,16 @@
 					$values[] = $group;
 				}
 			}
+			
+			//Remove current entry_id being edited from returned options to prevent circular lookup
+			//See https://github.com/symphonycms/selectbox_link_field/issues/38
+			$page = Administration::instance()->Page;
+        		$context = $page->getContext();
 
+		        if($context['page'] == 'edit'){
+		            unset($values[0]['values'][$context['entry_id']]);
+		        }
+			
 			return $values;
 		}
 
