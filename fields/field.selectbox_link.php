@@ -380,36 +380,20 @@
 		public function displaySettingsPanel(XMLElement &$wrapper, $errors = null){
 			parent::displaySettingsPanel($wrapper, $errors);
 
-			$sections = SectionManager::fetch(NULL, 'ASC', 'sortorder');
+			// Only append selected ids, load full section information asynchronously
 			$options = array();
 
-			if(is_array($sections) && !empty($sections)) foreach($sections as $section){
-				$section_fields = $section->fetchFields();
-				if(!is_array($section_fields)) continue;
-
-				$fields = array();
-				foreach($section_fields as $f){
-					if($f->get('id') != $this->get('id') && $f->canPrePopulate()) {
-						$fields[] = array(
-							$f->get('id'),
-							is_array($this->get('related_field_id')) ? in_array($f->get('id'), $this->get('related_field_id')) : false,
-							$f->get('label')
-						);
-					}
-				}
-
-				if(!empty($fields)) {
-					$options[] = array(
-						'label' => $section->get('name'),
-						'options' => $fields
-					);
+			if(is_array($this->get('related_field_id'))) {
+				foreach ($this->get('related_field_id') as $related_field_id) {
+					$options[] = array($related_field_id);
 				}
 			}
 
 			$label = Widget::Label(__('Values'));
 			$label->appendChild(
 				Widget::Select('fields['.$this->get('sortorder').'][related_field_id][]', $options, array(
-					'multiple' => 'multiple'
+					'multiple' => 'multiple',
+					'class' => 'js-fetch-sections'
 				))
 			);
 
