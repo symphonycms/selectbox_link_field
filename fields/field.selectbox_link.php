@@ -75,7 +75,7 @@
 			$this->_settings[$field] = $value;
 		}
 
-		public function findOptions(array $existing_selection=NULL){
+		public function findOptions(array $existing_selection=NULL,$entry_id=NULL){
 			$values = array();
 			$limit = $this->get('limit');
 
@@ -119,7 +119,8 @@
 							$group['values'][$value['id']] = $value['value'];
 						}
 					}
-
+					
+					unset($group['values'][$entry_id]);
 					$values[] = $group;
 				}
 			}
@@ -502,7 +503,7 @@
 				}
 			}
 
-			$states = $this->findOptions($entry_ids);
+			$states = $this->findOptions($entry_ids,$entry_id);
 			if(!empty($states)){
 				foreach($states as $s){
 					$group = array('label' => $s['name'], 'options' => array());
