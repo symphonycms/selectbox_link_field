@@ -380,36 +380,20 @@
 		public function displaySettingsPanel(XMLElement &$wrapper, $errors = null){
 			parent::displaySettingsPanel($wrapper, $errors);
 
-			$sections = SectionManager::fetch(NULL, 'ASC', 'sortorder');
+			// Only append selected ids, load full section information asynchronously
 			$options = array();
 
-			if(is_array($sections) && !empty($sections)) foreach($sections as $section){
-				$section_fields = $section->fetchFields();
-				if(!is_array($section_fields)) continue;
-
-				$fields = array();
-				foreach($section_fields as $f){
-					if($f->get('id') != $this->get('id') && $f->canPrePopulate()) {
-						$fields[] = array(
-							$f->get('id'),
-							is_array($this->get('related_field_id')) ? in_array($f->get('id'), $this->get('related_field_id')) : false,
-							$f->get('label')
-						);
-					}
-				}
-
-				if(!empty($fields)) {
-					$options[] = array(
-						'label' => $section->get('name'),
-						'options' => $fields
-					);
+			if(is_array($this->get('related_field_id'))) {
+				foreach ($this->get('related_field_id') as $related_field_id) {
+					$options[] = array($related_field_id);
 				}
 			}
 
 			$label = Widget::Label(__('Values'));
 			$label->appendChild(
 				Widget::Select('fields['.$this->get('sortorder').'][related_field_id][]', $options, array(
-					'multiple' => 'multiple'
+					'multiple' => 'multiple',
+					'class' => 'js-fetch-sections'
 				))
 			);
 
@@ -417,41 +401,49 @@
 			if(isset($errors['related_field_id'])) {
 				$wrapper->appendChild(Widget::Error($label, $errors['related_field_id']));
 			}
-			else $wrapper->appendChild($label);
-
-			$div = new XMLElement('div', NULL, array('class' => 'two columns'));
+			else {
+				$wrapper->appendChild($label);
+			}
 
 			// Maximum entries
-			$label = Widget::Label();
-			$label->setAttribute('class', 'column');
+			$label = Widget::Label(__('Maximum entries'));
 			$input = Widget::Input('fields['.$this->get('sortorder').'][limit]', (string)$this->get('limit'));
-			$input->setAttribute('size', '3');
-			$label->setValue(__('Limit to %s entries', array($input->generate())));
-			$div->appendChild($label);
+			$label->appendChild($input);
+			$wrapper->appendChild($label);
 
-			// Hide when prepopulated
-			$label = Widget::Label();
-			$label->setAttribute('class', 'column');
-			$input = Widget::Input('fields['.$this->get('sortorder').'][hide_when_prepopulated]', 'yes', 'checkbox');
-			if($this->get('hide_when_prepopulated') == 'yes') $input->setAttribute('checked', 'checked');
-			$label->setValue($input->generate() . ' ' . __('Hide when prepopulated'));
-			$div->appendChild($label);
-
+			// Options
+			$div = new XMLElement('div', NULL, array('class' => 'two columns'));
 			$wrapper->appendChild($div);
 
 			// Allow selection of multiple items
 			$label = Widget::Label();
 			$label->setAttribute('class', 'column');
 			$input = Widget::Input('fields['.$this->get('sortorder').'][allow_multiple_selection]', 'yes', 'checkbox');
-			if($this->get('allow_multiple_selection') == 'yes') $input->setAttribute('checked', 'checked');
-			$label->setValue($input->generate() . ' ' . __('Allow selection of multiple options'));
 
-			$div = new XMLElement('div', NULL, array('class' => 'two columns'));
+			if($this->get('allow_multiple_selection') == 'yes') {
+				$input->setAttribute('checked', 'checked');
+			}
+
+			$label->setValue($input->generate() . ' ' . __('Allow selection of multiple options'));
 			$div->appendChild($label);
+
+			// Show associations
 			$this->appendShowAssociationCheckbox($div);
-			$this->appendRequiredCheckbox($div);
-			$this->appendShowColumnCheckbox($div);
-			$wrapper->appendChild($div);
+
+			// Hide when prepopulated
+			$label = Widget::Label();
+			$label->setAttribute('class', 'column');
+			$input = Widget::Input('fields['.$this->get('sortorder').'][hide_when_prepopulated]', 'yes', 'checkbox');
+
+			if($this->get('hide_when_prepopulated') == 'yes') {
+				$input->setAttribute('checked', 'checked');
+			}
+
+			$label->setValue($input->generate() . ' ' . __('Hide when prepopulated'));
+			$div->appendChild($label);
+
+			// Requirements and table display
+			$this->appendStatusFooter($wrapper);
 		}
 
 		public function checkFields(array &$errors, $checkForDuplicates = true) {
@@ -516,12 +508,19 @@
 					$group = array('label' => $s['name'], 'options' => array());
 					if (count($s['values']) == 0) {
 						$group['options'][] = array(null, false, __('None found.'), null, null, array('disabled' => 'disabled'));
-					} else {
+					} 
+					else {
 						foreach($s['values'] as $id => $v){
 							$group['options'][] = array($id, in_array($id, $entry_ids), General::sanitize($v));
 						}
 					}
-					$options[] = $group;
+
+					if(count($states) == 1) {
+						$options = array_merge($options, $group['options']);
+					}
+					else {
+						$options[] = $group;
+					}
 				}
 			}
 
