@@ -120,7 +120,9 @@
 						}
 					}
 					
-					unset($group['values'][$entry_id]);
+					if(!is_null($entry_id) && isset($group['values'][$entry_id])){
+						unset($group['values'][$entry_id]);
+					}
 					$values[] = $group;
 				}
 			}
