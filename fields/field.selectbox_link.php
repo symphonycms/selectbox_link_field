@@ -294,7 +294,7 @@
 						}
 
 						// Get values:
-						if (
+						else if (
 							$field instanceof ExportableField
 							&& in_array(ExportableField::VALUE, $field->getExportModes())
 						) {
@@ -302,7 +302,7 @@
 								$field_data, ExportableField::VALUE, $entry->get('id')
 							);
 						}
-						
+
 						// Handle fields that are not exportable:
 						else {
 							$value = $field->getParameterPoolValue(
