@@ -1,10 +1,5 @@
 # Select Box Link Field
 
-- Version: 1.29
-- Author: Symphony Team
-- Release Date: 3 January 2014
-- Requirements: Symphony 2.3.3 or greater
-
 ## Installation
 
 1. Upload the `selectbox_link_field` folder in this archive to your Symphony 'extensions' folder.
