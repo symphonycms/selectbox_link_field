@@ -607,17 +607,12 @@
 				$data['relation_id'] = array($data['relation_id']);
 			}
 
-			$result = $this->findRelatedValues($data['relation_id']);
-
 			if(!is_null($link)){
-				$label = '';
-				foreach($result as $item){
-					$label .= $item['value'] . ', ';
-				}
-				$link->setValue(General::sanitize(trim($label, ', ')));
+				$link->setValue($this->preparePlainTextValue($data, $entry_id));
 				return $link->generate();
 			}
 
+			$result = $this->findRelatedValues($data['relation_id']);
 			$output = '';
 
 			foreach($result as $item){
@@ -626,6 +621,25 @@
 			}
 
 			return trim($output, ', ');
+		}
+
+		public function preparePlainTextValue($data, $entry_id = null, $truncate = false, $defaultValue = null) {
+			if(!is_array($data) || (is_array($data) && !isset($data['relation_id']))) {
+				return parent::preparePlainTextValue($data, $entry_id, $truncate, $defaultValue);
+			}
+
+			if(!is_array($data['relation_id'])){
+				$data['relation_id'] = array($data['relation_id']);
+			}
+
+			$result = $this->findRelatedValues($data['relation_id']);
+			
+			$label = '';
+			foreach($result as $item){
+				$label .= $item['value'] . ', ';
+			}
+			
+			return trim($label, ', ');
 		}
 
 	/*-------------------------------------------------------------------------
