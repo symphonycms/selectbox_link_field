@@ -396,7 +396,8 @@
 			$label->appendChild(
 				Widget::Select('fields['.$this->get('sortorder').'][related_field_id][]', $options, array(
 					'multiple' => 'multiple',
-					'class' => 'js-fetch-sections'
+					'class' => 'js-fetch-sections',
+					'data-required' => 'true',
 				))
 			);
 
