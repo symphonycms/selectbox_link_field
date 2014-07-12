@@ -9,7 +9,6 @@
 						`id` int(11) unsigned NOT NULL auto_increment,
 						`field_id` int(11) unsigned NOT NULL,
 						`allow_multiple_selection` enum('yes','no') NOT NULL default 'no',
-						`show_association` enum('yes','no') NOT NULL default 'yes',
 						`hide_when_prepopulated` enum('yes','no') NOT NULL default 'no',
 						`related_field_id` VARCHAR(255) NOT NULL,
 						`limit` int(4) unsigned NOT NULL default '20',
@@ -92,6 +91,15 @@
 			if(version_compare($previousVersion, '1.19', '<')){
 				try{
 					Symphony::Database()->query("ALTER TABLE `tbl_fields_selectbox_link` ADD COLUMN `show_association` enum('yes','no') NOT NULL default 'yes'");
+				}
+				catch(Exception $e){
+					// Discard
+				}
+			}
+
+			if(version_compare($previousVersion, '1.31', '<')){
+				try{
+					Symphony::Database()->query("ALTER TABLE `tbl_fields_selectbox_link` DROP COLUMN `show_association`");
 				}
 				catch(Exception $e){
 					// Discard

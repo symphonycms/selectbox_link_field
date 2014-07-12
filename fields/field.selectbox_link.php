@@ -485,11 +485,10 @@
 			$fields = array();
 			$fields['field_id'] = $id;
 			if($this->get('related_field_id') != '') $fields['related_field_id'] = $this->get('related_field_id');
+			$fields['related_field_id'] = implode(',', $this->get('related_field_id'));
 			$fields['allow_multiple_selection'] = $this->get('allow_multiple_selection') ? $this->get('allow_multiple_selection') : 'no';
-			$fields['show_association'] = $this->get('show_association') == 'yes' ? 'yes' : 'no';
 			$fields['hide_when_prepopulated'] = $this->get('hide_when_prepopulated') == 'yes' ? 'yes' : 'no';
 			$fields['limit'] = max(1, (int)$this->get('limit'));
-			$fields['related_field_id'] = implode(',', $this->get('related_field_id'));
 
 			if(!FieldManager::saveSettings($id, $fields)) return false;
 
