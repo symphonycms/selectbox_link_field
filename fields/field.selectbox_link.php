@@ -453,7 +453,9 @@
 		public function checkPostFieldData($data, &$message, $entry_id = null){
 			$message = NULL;
 
-			$data = isset($data['relation_id']) ? array_filter($data['relation_id']) : array();
+			$data = isset($data['relation_id'])
+				? array_filter($data['relation_id'])
+				: $data;
 
 			if ($this->get('required') == 'yes' && (empty($data))) {
 				$message = __('‘%s’ is a required field.', array($this->get('label')));
