@@ -453,7 +453,7 @@
 		public function checkPostFieldData($data, &$message, $entry_id = null){
 			$message = NULL;
 
-			$data = isset($data['relation_id'])
+			$data = is_array($data) && isset($data['relation_id'])
 				? array_filter($data['relation_id'])
 				: $data;
 
