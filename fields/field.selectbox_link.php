@@ -826,6 +826,9 @@
 					$negation = true;
 					$null = true;
 				}
+				else if(preg_match('/^regexp:/', $data[0])) {
+					$data[0] = preg_replace('/^regexp:/', null, $data[0]);
+				}
 
 				foreach($data as $key => &$value) {
 					// for now, I assume string values are the only possible handles.
