@@ -14,6 +14,12 @@
 		</author>
 	</authors>
 	<releases>
+		<release version="1.31" date="2014-08-17" min="2.4" max="2.5">
+			- Mark compatibility with Symphony 2.4+
+			- Various updates for Symphony's associations
+			- Add implementation of `checkPostFieldData` and `preparePlainTextValue`
+			- Fixes for better publish filtering support in the core
+		</release>
 		<release version="1.30" date="2014-04-17" min="2.4">
 			- General update to Symphony 2.4 (@brendo/@nilshoerrmann)
 			- [#46](https://github.com/symphonycms/selectbox_link_field/issues/46) Remove `optgroup` when there is only a single section (@nilshoerrmann)
@@ -21,37 +27,37 @@
 			- Updates to German translation (@nilshoerrmann)
 			- Added French translation (@nitriques)
 		</release>
-		<release version="1.29" date="2014-03-01" min="2.3.3">
+		<release version="1.29" date="2014-03-01" min="2.3.3" max="2.3.x">
 			- [#18](https://github.com/symphonycms/selectbox_link_field/issues/18) Show a message when there are no entries in a section
 			- Correctly fetch file name and other values using the Exportable interface
 			- Revert to saving NULL instead of 0 when no value is selected
 			- Updated Russian translation
 		</release>
-		<release version="1.28" date="2013-07-01" min="2.3.3">
+		<release version="1.28" date="2013-07-01" min="2.3.3" max="2.3.x">
 			- Add Finnish and Polish translations
 			- Update links to **getsymphony.com**
 		</release>
-		<release version="1.27" date="2013-05-12" min="2.3.3">
+		<release version="1.27" date="2013-05-12" min="2.3.3" max="2.3.x">
 			- [#36](https://github.com/symphonycms/selectbox_link_field/issues/36) Add functionality to hide field in a prepopulated state
 			- [#35](https://github.com/symphonycms/selectbox_link_field/issues/35) Handle grouping on null values better
 			- When importing into the SBL field, if the data given is not entry ID's, attempt to find the entry ID's assuming the value we've been given is handles or values
 		</release>
-		<release version="1.26" date="2013-02-22" min="2.3.2">
+		<release version="1.26" date="2013-02-22" min="2.3.2" max="2.3.x">
 			- Implement the updated `ImportableField` interface
 			- Updated Russian language
 			- Handle sections that no longer exist
 		</release>
-		<release version="1.25" date="2012-10-29" min="2.3.1">
+		<release version="1.25" date="2012-10-29" min="2.3.1" max="2.3.x">
 			- [#30](https://github.com/symphonycms/selectbox_link_field/issues/30) Separate multiple values in the backend publish tables.
 			- [#29](https://github.com/symphonycms/selectbox_link_field/issues/29) Apply alternate SQL query for not: filters.
 			- [#20](https://github.com/symphonycms/selectbox_link_field/issues/20) Entries are now ordered the same way as their parent section.
 		</release>
-		<release version="1.24" date="2012-09-16" min="2.3.1">
+		<release version="1.24" date="2012-09-16" min="2.3.1" max="2.3.x">
 			- [#23](https://github.com/symphonycms/selectbox_link_field/pull/23) Fix invalid type error
 			- Add `ImportableField` and `ExportableField` support
 			- Fix issues where cached entries would not be unique (and therefore would no show in the backend)
 		</release>
-		<release version="1.23" date="2012-05-22" min="2.3">
+		<release version="1.23" date="2012-05-22" min="2.3" max="2.3.x">
 			- Updates for Symphony 2.3
 			- [#19](https://github.com/symphonycms/selectbox_link_field/issues/19) Add `sql-null-or-not:` filtering
 			- [#16](https://github.com/symphonycms/selectbox_link_field/issues/16) Ensure options are sorted by recency
