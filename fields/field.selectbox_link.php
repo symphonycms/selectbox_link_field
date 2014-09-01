@@ -119,7 +119,7 @@
 							$group['values'][$value['id']] = $value['value'];
 						}
 					}
-					
+
 					if(!is_null($entry_id) && isset($group['values'][$entry_id])){
 						unset($group['values'][$entry_id]);
 					}
@@ -308,6 +308,10 @@
 							$value = $field->getParameterPoolValue(
 								$field_data, $entry->get('id')
 							);
+
+							if(is_array($value) && count($value) === 1) {
+								$value = implode($value);
+							}
 						}
 
 						$relation_data[] = array(
@@ -529,7 +533,7 @@
 					$group = array('label' => $s['name'], 'options' => array());
 					if (count($s['values']) == 0) {
 						$group['options'][] = array(null, false, __('None found.'), null, null, array('disabled' => 'disabled'));
-					} 
+					}
 					else {
 						foreach($s['values'] as $id => $v){
 							$group['options'][] = array($id, in_array($id, $entry_ids), General::sanitize($v));
