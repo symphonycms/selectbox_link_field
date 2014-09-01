@@ -309,8 +309,8 @@
 								$field_data, $entry->get('id')
 							);
 
-							if(is_array($value) && count($value) === 1) {
-								$value = implode($value);
+							if(is_array($value)) {
+								$value = implode(', ', $value);
 							}
 						}
 
