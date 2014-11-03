@@ -316,7 +316,7 @@
 
 						$relation_data[] = array(
 							'id' =>				$entry->get('id'),
-							'section_handle' =>	$section_info[$section_id]['handle'],
+							'section_handle' => $section_info[$section_id]['handle'],
 							'section_name' =>	$section_info[$section_id]['name'],
 							'value' =>			$value
 						);
@@ -655,12 +655,12 @@
 			}
 
 			$result = $this->findRelatedValues($data['relation_id']);
-			
+
 			$label = '';
 			foreach($result as $item){
 				$label .= $item['value'] . ', ';
 			}
-			
+
 			return trim($label, ', ');
 		}
 
@@ -796,6 +796,32 @@
 	/*-------------------------------------------------------------------------
 		Filtering:
 	-------------------------------------------------------------------------*/
+
+		public function fetchFilterableOperators()
+		{
+			return array(
+				array(
+					'filter' => 'sql: NOT NULL',
+					'title' => 'is not empty',
+					'help' => __('Find entries where any value is selected.')
+				),
+				array(
+					'filter' => 'sql: NULL',
+					'title' => 'is empty',
+					'help' => __('Find entries where no value is selected.')
+				),
+				array(
+					'filter' => 'sql-null-or-not: ',
+					'title' => 'is empty or not',
+					'help' => __('Find entries where no value is selected or it is not equal to this value.')
+				),
+				array(
+					'filter' => 'not: ',
+					'title' => 'is not',
+					'help' => __('Find entries where the value is not equal to this value.')
+				)
+			);
+		}
 
 		public function buildDSRetrievalSQL($data, &$joins, &$where, $andOperation=false){
 			$field_id = $this->get('id');
