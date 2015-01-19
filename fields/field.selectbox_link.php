@@ -314,6 +314,16 @@
 							}
 						}
 
+                        /**
+                         * To ensure that the output is 'safe' for whoever consumes this function,
+                         * we will sanitize the value. Before sanitizing, we will reverse sanitise
+                         * the value to handle the scenario where the Field has been good and
+                         * has already sanitized the value.
+                         *
+                         * @see https://github.com/symphonycms/symphony-2/issues/2318
+                         */
+                        $value = General::sanitize(General::reverse_sanitize($value));
+
 						$relation_data[] = array(
 							'id' =>				$entry->get('id'),
 							'section_handle' => $section_info[$section_id]['handle'],
@@ -606,7 +616,7 @@
 				$item->setAttribute('handle', Lang::createHandle($relation['value']));
 				$item->setAttribute('section-handle', $relation['section_handle']);
 				$item->setAttribute('section-name', General::sanitize($relation['section_name']));
-				$item->setValue(General::sanitize($relation['value']));
+				$item->setValue($relation['value']);
 
 				$list->appendChild($item);
 			}
@@ -782,11 +792,11 @@
 				$item = (object)$item;
 
 				if ($mode === $modes->listValue) {
-					$items[] = $item->value;
+					$items[] = General::reverse_sanitize($item->value);
 				}
 
 				else if ($mode === $modes->listEntryToValue) {
-					$items[$item->id] = $item->value;
+					$items[$item->id] = General::reverse_sanitize($item->value);
 				}
 			}
 
