@@ -47,6 +47,11 @@
 			return ($this->get('allow_multiple_selection') == 'yes' ? true : false);
 		}
 
+        public function fetchSuggestionTypes()
+        {
+            return array('association');
+        }
+
 	/*-------------------------------------------------------------------------
 		Setup:
 	-------------------------------------------------------------------------*/
@@ -810,6 +815,11 @@
 		public function fetchFilterableOperators()
 		{
 			return array(
+                array(
+                    'title' => 'is',
+                    'filter' => ' ',
+                    'help' => __('Find values that are an exact match for the given string.')
+                ),
 				array(
 					'filter' => 'sql: NOT NULL',
 					'title' => 'is not empty',
