@@ -685,8 +685,8 @@
 
         public function getImportModes() {
             return array(
-                'getValue' =>       ImportableField::STRING_VALUE,
-                'getPostdata' =>    ImportableField::ARRAY_VALUE
+                'getPostdata' =>    ImportableField::ARRAY_VALUE,
+                'getValue' =>       ImportableField::STRING_VALUE
             );
         }
 
