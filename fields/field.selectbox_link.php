@@ -35,6 +35,17 @@
             return true;
         }
 
+        public function isSortable(){
+            $relatedFieldsId = $this->getRelatedFieldsId();
+            foreach ($relatedFieldsId as $relatedFieldId) {
+                $fieldSchema = self::getFieldSchema($relatedFieldId);
+                if (empty($fieldSchema)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public function allowDatasourceOutputGrouping(){
             return ($this->get('allow_multiple_selection') == 'yes' ? false : true);
         }
@@ -928,6 +939,64 @@
             }
 
             return true;
+        }
+
+    /*-------------------------------------------------------------------------
+        Sorting:
+    -------------------------------------------------------------------------*/
+
+        private static function getFieldSchema($fieldId) {
+            try {
+                return Symphony::Database()->fetch("
+                    SHOW COLUMNS FROM `tbl_entries_data_$fieldId`
+                        WHERE `Field` in ('value');
+                ");
+            }
+            catch (Exception $ex) {
+                // bail out
+            }
+            return null;
+        }
+
+        private function getRelatedFieldsId() {
+            $related_field_id = $this->get('related_field_id');
+            if (is_array($related_field_id)) {
+                return $related_field_id;
+            }
+            return explode(',', $related_field_id);
+        }
+
+        public function buildSortingSQL(&$joins, &$where, &$sort, $order='ASC'){
+            if(in_array(strtolower($order), array('random', 'rand'))) {
+                $sort = 'ORDER BY RAND()';
+            }
+            else {
+                $sort = array();
+                $joinnedFieldSchema = array();
+                $joinnedFieldsId = $this->getRelatedFieldsId();
+
+                foreach ($joinnedFieldsId as $key => $joinnedFieldId) {
+                    $joinnedFieldSchema = self::getFieldSchema($joinnedFieldId);
+
+                    if (empty($joinnedFieldSchema)) {
+                        // bail out
+                        return;
+                    }
+                    $joinnedFieldSchema = current($joinnedFieldSchema);
+                    $sortColumn = $joinnedFieldSchema['Field'];
+                    // create SQL
+                    $joins .= "LEFT OUTER JOIN `tbl_entries_data_".$this->get('id')."` AS `ed_$key` ON (`e`.`id` = `ed_$key`.`entry_id`) ";
+                    $joins .= "LEFT OUTER JOIN `tbl_entries_data_$joinnedFieldId` AS `jd_$key` ON (`ed_$key`.`relation_id` = `jd_$key`.`entry_id`) ";
+                    $sort[] = "`jd_$key`.`$sortColumn` $order";
+                }
+
+                if (empty($sort)) {
+                    $sort = '';
+                }
+                else {
+                    $sort = 'ORDER BY ' . implode(',', $sort);
+                }
+            }
         }
 
     /*-------------------------------------------------------------------------
