@@ -38,7 +38,7 @@
         public function isSortable(){
             $relatedFieldsId = $this->getRelatedFieldsId();
             foreach ($relatedFieldsId as $relatedFieldId) {
-                $fieldSchema = self::getFieldSchema($relatedFieldId);
+                $fieldSchema = $this->getFieldSchema($relatedFieldId);
                 if (empty($fieldSchema)) {
                     return false;
                 }
@@ -945,7 +945,7 @@
         Sorting:
     -------------------------------------------------------------------------*/
 
-        private static function getFieldSchema($fieldId) {
+        protected function getFieldSchema($fieldId) {
             try {
                 return Symphony::Database()->fetch("
                     SHOW COLUMNS FROM `tbl_entries_data_$fieldId`
@@ -976,7 +976,7 @@
                 $joinnedFieldsId = $this->getRelatedFieldsId();
 
                 foreach ($joinnedFieldsId as $key => $joinnedFieldId) {
-                    $joinnedFieldSchema = self::getFieldSchema($joinnedFieldId);
+                    $joinnedFieldSchema = $this->getFieldSchema($joinnedFieldId);
 
                     if (empty($joinnedFieldSchema)) {
                         // bail out
