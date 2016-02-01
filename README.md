@@ -28,3 +28,9 @@ The Select Box Link supports the following filtering options in your data source
 - `sql: NOT NULL`: Return all entries that have a linked entry
 
 Please note that predicate filters, such as `not:` or `sql:`, will ignore all other [data source filters](http://getsymphony.com/learn/concepts/view/data-source-filters/) for that field.
+
+## Sorting
+
+The sorting is activated only if ALL related field are sortable.
+
+Right now, to be sortable, the related field must have a `value` column in the entries data.
