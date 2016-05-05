@@ -324,10 +324,6 @@
                             $value = $field->prepareTextValue(
                                 $field_data, $entry->get('id')
                             );
-
-                            if(is_array($value)) {
-                                $value = implode(', ', $value);
-                            }
                         }
 
                         /**
