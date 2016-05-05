@@ -625,7 +625,7 @@
 
                 $item = new XMLElement('item');
                 $item->setAttribute('id', $relation['id']);
-                $item->setAttribute('handle', Lang::createHandle($relation['value']));
+                $item->setAttribute('handle', Lang::createHandle(General::reverse_sanitize($relation['value'])));
                 $item->setAttribute('section-handle', $relation['section_handle']);
                 $item->setAttribute('section-name', General::sanitize($relation['section_name']));
                 $item->setValue($relation['value']);
