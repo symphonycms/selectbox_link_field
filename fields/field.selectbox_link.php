@@ -321,7 +321,7 @@
 
                         // Handle fields that are not exportable:
                         else {
-                            $value = $field->getParameterPoolValue(
+                            $value = $field->prepareTextValue(
                                 $field_data, $entry->get('id')
                             );
 
