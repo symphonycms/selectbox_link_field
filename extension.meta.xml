@@ -6,6 +6,7 @@
     <url type="discuss">http://getsymphony.com/discuss/thread/473/</url>
     <types>
         <type>Field Types</type>
+        <type>Relationship</type>
     </types>
     <authors>
         <author>
@@ -14,6 +15,12 @@
         </author>
     </authors>
     <releases>
+        <release version="2.0.0" date="2016-05-15" min="2.6.0" max="2.6.x">
+            - Switch to semver (but should be backward compatible)
+            - Fix for MySQL 5.7
+            - Do not create handles based on sanitized value
+            - Replace getParameterPoolValue by prepareTextValue when getting values
+        </release>
         <release version="1.34" date="2016-02-01" min="2.6.0" max="2.6.x">
             - Added basic sorting capabilities
         </release>
