@@ -966,7 +966,7 @@
             return explode(',', $related_field_id);
         }
 
-        public function buildSortingSQL(&$joins, &$where, &$sort, $order='ASC', &$select = NULL){
+        public function buildSortingSQL(&$joins, &$where, &$sort, $order='ASC'){
             if(in_array(strtolower($order), array('random', 'rand'))) {
                 $sort = 'ORDER BY RAND()';
             }
@@ -1023,6 +1023,11 @@
             if (!empty($sort)) {
                 return implode(',', $sort);
             }
+            return null;
+        }
+
+        public function buildSortingSelectSQL($sort, $order = 'ASC')
+        {
             return null;
         }
 
