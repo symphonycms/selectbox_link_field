@@ -995,6 +995,33 @@
             }
         }
 
+        public function buildSortingSelectSQL($sort, $order = 'ASC')
+        {
+            if ($this->isRandomOrder($order)) {
+                return null;
+            }
+            $sort = array();
+            $joinnedFieldSchema = array();
+            $joinnedFieldsId = $this->getRelatedFieldsId();
+
+            foreach ($joinnedFieldsId as $key => $joinnedFieldId) {
+                $joinnedFieldSchema = $this->getFieldSchema($joinnedFieldId);
+
+                if (empty($joinnedFieldSchema)) {
+                    // bail out
+                    return;
+                }
+                $joinnedFieldSchema = current($joinnedFieldSchema);
+                $sortColumn = $joinnedFieldSchema['Field'];
+                $sort[] = "`jd_$key`.`$sortColumn`";
+            }
+
+            if (!empty($sort)) {
+                return implode(',', $sort);
+            }
+            return null;
+        }
+
     /*-------------------------------------------------------------------------
         Grouping:
     -------------------------------------------------------------------------*/
