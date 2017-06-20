@@ -3,7 +3,7 @@
     <name>Select Box Link Field</name>
     <description>Linking two sections together</description>
     <repo type="github">https://github.com/symphonycms/selectbox_link_field</repo>
-    <url type="discuss">http://getsymphony.com/discuss/thread/473/</url>
+    <url type="discuss">https://getsymphony.com/discuss/thread/473/</url>
     <types>
         <type>Field Types</type>
         <type>Relationship</type>
@@ -11,10 +11,13 @@
     <authors>
         <author>
             <name github="symphonycms" symphony="team">Symphony Team</name>
-            <website>http://getsymphony.com</website>
+            <website>https://getsymphony.com</website>
         </author>
     </authors>
     <releases>
+        <release version="2.0.1" date="2017-06-20" min="2.6.0" max="2.x.x">
+            - Fix for Symphony 2.7.0 with MySQL 5.7
+        </release>
         <release version="2.0.0" date="2016-05-15" min="2.6.0" max="2.6.x">
             - Switch to semver (but should be backward compatible)
             - Fix for MySQL 5.7
