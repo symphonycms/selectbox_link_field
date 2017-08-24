@@ -74,9 +74,9 @@
         public function createTable(){
             return Symphony::Database()->query(
                 "CREATE TABLE IF NOT EXISTS `tbl_entries_data_" . $this->get('id') . "` (
-                    `id` int(11) unsigned NOT NULL auto_increment,
-                    `entry_id` int(11) unsigned NOT NULL,
-                    `relation_id` int(11) unsigned DEFAULT NULL,
+                    `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+                    `entry_id` INT(11) UNSIGNED NOT NULL,
+                    `relation_id` INT(11) UNSIGNED DEFAULT NULL,
                     PRIMARY KEY (`id`),
                     KEY `entry_id` (`entry_id`),
                     KEY `relation_id` (`relation_id`)
@@ -95,7 +95,7 @@
             $this->_settings[$field] = $value;
         }
 
-        public function findOptions(array $existing_selection=NULL,$entry_id=NULL){
+        public function findOptions(array $existing_selection = null, $entry_id = null){
             $values = array();
             $limit = $this->get('limit');
 
@@ -120,7 +120,7 @@
                     );
 
                     EntryManager::setFetchSorting($section->getSortingField(), $section->getSortingOrder());
-                    $entries = EntryManager::fetch(NULL, $section->get('id'), $limit, 0, null, null, false, false);
+                    $entries = EntryManager::fetch(null, $section->get('id'), $limit, 0, null, null, false, false);
 
                     $results = array();
                     foreach($entries as $entry) {
@@ -161,7 +161,7 @@
             return $output;
         }
 
-        public function toggleFieldData(array $data, $newState, $entry_id=null){
+        public function toggleFieldData(array $data, $newState, $entry_id = null){
             $data['relation_id'] = $newState;
             return $data;
         }
@@ -186,7 +186,7 @@
             ));
         }
 
-        public function fetchAssociatedEntrySearchValue($data, $field_id=NULL, $parent_entry_id=NULL){
+        public function fetchAssociatedEntrySearchValue($data, $field_id = null, $parent_entry_id = null){
             // We dont care about $data, but instead $parent_entry_id
             if(!is_null($parent_entry_id)) return $parent_entry_id;
 
@@ -446,7 +446,7 @@
             $wrapper->appendChild($label);
 
             // Options
-            $div = new XMLElement('div', NULL, array('class' => 'two columns'));
+            $div = new XMLElement('div', null, array('class' => 'two columns'));
             $wrapper->appendChild($div);
 
             // Allow selection of multiple items
@@ -481,7 +481,7 @@
         }
 
         public function checkPostFieldData($data, &$message, $entry_id = null){
-            $message = NULL;
+            $message = null;
 
             if (is_array($data)) {
                 $data = isset($data['relation_id'])
@@ -528,7 +528,7 @@
 
             SectionManager::removeSectionAssociation($id);
             foreach($this->get('related_field_id') as $field_id){
-                SectionManager::createSectionAssociation(NULL, $id, $field_id, $this->get('show_association') == 'yes' ? true : false);
+                SectionManager::createSectionAssociation(null, $id, $field_id, $this->get('show_association') == 'yes' ? true : false);
             }
 
             return true;
@@ -541,7 +541,7 @@
         public function displayPublishPanel(XMLElement &$wrapper, $data = null, $flagWithError = null, $fieldnamePrefix = null, $fieldnamePostfix = null, $entry_id = null) {
             $entry_ids = array();
             $options = array(
-                array(NULL, false, NULL)
+                array(null, false, null)
             );
 
             if(!is_null($data['relation_id'])){
@@ -582,7 +582,7 @@
             if($this->get('required') != 'yes') $label->appendChild(new XMLElement('i', __('Optional')));
             $label->appendChild(
                 Widget::Select($fieldname, $options, ($this->get('allow_multiple_selection') == 'yes' ? array(
-                    'multiple' => 'multiple') : NULL
+                    'multiple' => 'multiple') : null
                 ))
             );
 
@@ -592,7 +592,7 @@
             else $wrapper->appendChild($label);
         }
 
-        public function processRawFieldData($data, &$status, &$message=null, $simulate=false, $entry_id=null) {
+        public function processRawFieldData($data, &$status, &$message = null, $simulate = false, $entry_id = null) {
             $status = self::__OK__;
             $result = array();
 
@@ -640,7 +640,7 @@
             $wrapper->appendChild($list);
         }
 
-        public function getParameterPoolValue(array $data, $entry_id=NULL){
+        public function getParameterPoolValue(array $data, $entry_id = null){
             return $this->prepareExportValue($data, ExportableField::LIST_OF + ExportableField::ENTRY, $entry_id);
         }
 
@@ -854,7 +854,7 @@
             );
         }
 
-        public function buildDSRetrievalSQL($data, &$joins, &$where, $andOperation=false){
+        public function buildDSRetrievalSQL($data, &$joins, &$where, $andOperation = false){
             $field_id = $this->get('id');
 
             if(preg_match('/^sql:\s*/', $data[0], $matches)) {
@@ -966,7 +966,7 @@
             return explode(',', $related_field_id);
         }
 
-        public function buildSortingSQL(&$joins, &$where, &$sort, $order='ASC'){
+        public function buildSortingSQL(&$joins, &$where, &$sort, $order = 'ASC'){
             if(in_array(strtolower($order), array('random', 'rand'))) {
                 $sort = 'ORDER BY RAND()';
             }

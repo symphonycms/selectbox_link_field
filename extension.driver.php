@@ -6,12 +6,12 @@
             try{
                 Symphony::Database()->query("
                     CREATE TABLE IF NOT EXISTS `tbl_fields_selectbox_link` (
-                        `id` int(11) unsigned NOT NULL auto_increment,
-                        `field_id` int(11) unsigned NOT NULL,
-                        `allow_multiple_selection` enum('yes','no') NOT NULL default 'no',
-                        `hide_when_prepopulated` enum('yes','no') NOT NULL default 'no',
+                        `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+                        `field_id` INT(11) UNSIGNED NOT NULL,
+                        `allow_multiple_selection` ENUM('yes','no') NOT NULL default 'no',
+                        `hide_when_prepopulated` ENUM('yes','no') NOT NULL default 'no',
                         `related_field_id` VARCHAR(255) NOT NULL,
-                        `limit` int(4) unsigned NOT NULL default '20',
+                        `limit` INT(4) UNSIGNED NOT NULL default '20',
                         PRIMARY KEY  (`id`),
                         KEY `field_id` (`field_id`)
                     ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -90,7 +90,7 @@
 
             if(version_compare($previousVersion, '1.19', '<')){
                 try{
-                    Symphony::Database()->query("ALTER TABLE `tbl_fields_selectbox_link` ADD COLUMN `show_association` enum('yes','no') NOT NULL default 'yes'");
+                    Symphony::Database()->query("ALTER TABLE `tbl_fields_selectbox_link` ADD COLUMN `show_association` ENUM('yes','no') NOT NULL default 'yes'");
                 }
                 catch(Exception $e){
                     // Discard
