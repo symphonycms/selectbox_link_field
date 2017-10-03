@@ -35,6 +35,10 @@
             return true;
         }
 
+        public function canPrePopulate() {
+            return true;
+        }
+
         public function isSortable(){
             $relatedFieldsId = $this->getRelatedFieldsId();
             foreach ($relatedFieldsId as $relatedFieldId) {
