@@ -3,42 +3,63 @@
     Class extension_selectbox_link_field extends Extension{
 
         public function install(){
-            try{
-                Symphony::Database()->query("
-                    CREATE TABLE IF NOT EXISTS `tbl_fields_selectbox_link` (
-                        `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-                        `field_id` INT(11) UNSIGNED NOT NULL,
-                        `allow_multiple_selection` ENUM('yes','no') NOT NULL default 'no',
-                        `hide_when_prepopulated` ENUM('yes','no') NOT NULL default 'no',
-                        `related_field_id` VARCHAR(255) NOT NULL,
-                        `limit` INT(4) UNSIGNED NOT NULL default '20',
-                        PRIMARY KEY  (`id`),
-                        KEY `field_id` (`field_id`)
-                    ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-                ");
-            }
-            catch(Exception $e){
-                return false;
-            }
-
-            return true;
+            return Symphony::Database()
+                ->create('tbl_fields_selectbox_link')
+                ->ifNotExists()
+                ->charset('utf8')
+                ->collate('utf8_unicode_ci')
+                ->fields([
+                    'id' => [
+                        'type' => 'int(11)',
+                        'auto' => true,
+                    ],
+                    'field_id' => 'int(11)',
+                    'allow_multiple_selection' => [
+                        'type' => 'enum',
+                        'values' => ['yes','no'],
+                        'default' => 'no',
+                    ],
+                    'hide_when_prepopulated' => [
+                        'type' => 'enum',
+                        'values' => ['yes','no'],
+                        'default' => 'no',
+                    ],
+                    'related_field_id' => 'varchar(255)',
+                    'limit' => [
+                        'type' => 'int(4)',
+                        'default' => 20
+                    ],
+                ])
+                ->keys([
+                    'id' => 'primary',
+                    'field_id' => 'key',
+                ])
+                ->execute()
+                ->success();
         }
 
         public function uninstall(){
-            if(parent::uninstall() == true){
-                Symphony::Database()->query("DROP TABLE `tbl_fields_selectbox_link`");
-                return true;
-            }
-
-            return false;
+            Symphony::Database()
+                ->drop('tbl_fields_selectbox_link')
+                ->ifExists()
+                ->execute()
+                ->success();
         }
 
         public function update($previousVersion = false){
             try{
                 if(version_compare($previousVersion, '1.27', '<')){
-                    Symphony::Database()->query(
-                        "ALTER TABLE `tbl_fields_selectbox_link` ADD `hide_when_prepopulated` ENUM('yes','no') DEFAULT 'no'"
-                    );
+                    Symphony::Database()
+                        ->alter('tbl_fields_selectbox_link')
+                        ->add([
+                            'hide_when_prepopulated' => [
+                                'type' => 'enum',
+                                'values' => ['yes','no'],
+                                'default' => 'no',
+                            ],
+                        ])
+                        ->execute()
+                        ->success();
                 }
             }
             catch(Exception $e){
@@ -47,9 +68,16 @@
 
             try{
                 if(version_compare($previousVersion, '1.6', '<')){
-                    Symphony::Database()->query(
-                        "ALTER TABLE `tbl_fields_selectbox_link` ADD `limit` INT(4) UNSIGNED NOT NULL DEFAULT '20'"
-                    );
+                    Symphony::Database()
+                        ->alter('tbl_fields_selectbox_link')
+                        ->add([
+                            'limit' => [
+                                'type' => 'int(4)',
+                                'default' => 20
+                            ],
+                        ])
+                        ->execute()
+                        ->success();
                 }
             }
             catch(Exception $e){
@@ -58,9 +86,11 @@
 
             if(version_compare($previousVersion, '1.15', '<')){
                 try{
-                    $fields = Symphony::Database()->fetchCol('field_id',
-                        "SELECT `field_id` FROM `tbl_fields_selectbox_link`"
-                    );
+                    $fields = Symphony::Database()
+                        ->select(['field_id'])
+                        ->from('tbl_fields_selectbox_link')
+                        ->execute()
+                        ->column('field_id');
                 }
                 catch(Exception $e){
                     // Discard
@@ -69,13 +99,18 @@
                 if(is_array($fields) && !empty($fields)){
                     foreach($fields as $field_id){
                         try{
-                            Symphony::Database()->query(
-                                "ALTER TABLE `tbl_entries_data_{$field_id}`
-                                CHANGE `relation_id` `relation_id` INT(11) UNSIGNED NULL DEFAULT NULL"
-                            );
+                            Symphony::Database()
+                                ->alter('tbl_entries_data_' . $field_id)
+                                ->modify([
+                                    'relation_id' => [
+                                        'type' => 'int(11)',
+                                        'null' => true,
+                                    ],
+                                ])
+                                ->execute()
+                                ->success();
                         }
                         catch(Exception $e){
-                            // Discard
                         }
                     }
                 }
