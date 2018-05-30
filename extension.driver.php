@@ -117,7 +117,13 @@
             }
 
             try{
-                Symphony::Database()->query("ALTER TABLE `tbl_fields_selectbox_link` CHANGE `related_field_id` `related_field_id` VARCHAR(255) NOT NULL");
+                Symphony::Database()
+                    ->alter('tbl_fields_selectbox_link')
+                    ->modify([
+                        'related_field_id' => 'varchar(255)'
+                    ])
+                    ->execute()
+                    ->success();
             }
             catch(Exception $e){
                 // Discard
@@ -125,7 +131,17 @@
 
             if(version_compare($previousVersion, '1.19', '<')){
                 try{
-                    Symphony::Database()->query("ALTER TABLE `tbl_fields_selectbox_link` ADD COLUMN `show_association` ENUM('yes','no') NOT NULL default 'yes'");
+                    Symphony::Database()
+                        ->alter()
+                        ->add([
+                            'show_association' => [
+                                'type' => 'enum',
+                                'values' => ['yes','no'],
+                                'default' => 'yes',
+                            ],
+                        ])
+                        ->execute()
+                        ->success();
                 }
                 catch(Exception $e){
                     // Discard
@@ -134,7 +150,11 @@
 
             if(version_compare($previousVersion, '1.31', '<')){
                 try{
-                    Symphony::Database()->query("ALTER TABLE `tbl_fields_selectbox_link` DROP COLUMN `show_association`");
+                    Symphony::Database()
+                        ->alter('tbl_fields_selectbox_link')
+                        ->drop('show_association')
+                        ->execute()
+                        ->success();
                 }
                 catch(Exception $e){
                     // Discard
