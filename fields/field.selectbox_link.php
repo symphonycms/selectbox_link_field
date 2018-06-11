@@ -4,6 +4,7 @@
 
     require_once FACE . '/interface.exportablefield.php';
     require_once FACE . '/interface.importablefield.php';
+    require_once(EXTENSIONS . '/selectbox_link_field/lib/class.entryquerylinkadapter.php');
 
     class FieldSelectBox_Link extends Field implements ExportableField, ImportableField {
         private static $cache = array();
@@ -14,6 +15,8 @@
 
         public function __construct(){
             parent::__construct();
+            $this->entryQueryFieldAdapter = new EntryQueryLinkAdapter($this);
+
             $this->_name = __('Select Box Link');
             $this->_required = true;
             $this->_showassociation = true;
