@@ -19,6 +19,7 @@
             - Update for Symphony 4.x
             - PHP7 Compatibility
             - Code refactoring for Database and EQFA
+            - Replace deprecated method fetch() by select()
         </release>
         <release version="2.0.2" date="2017-10-06" min="2.6.0" max="2.x.x">
             - [#87](https://github.com/symphonycms/selectbox_link_field/issues/87) Add missing canPrePopulate() function

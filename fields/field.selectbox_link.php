@@ -129,14 +129,24 @@
                 ->rows();
 
             foreach($sections as $_section) {
-                $section = SectionManager::fetch($_section['id']);
+                $section = (new SectionManager)
+                    ->select()
+                    ->section($_section['id'])
+                    ->execute()
+                    ->next();
                 $group = array(
                     'name' => $section->get('name'),
                     'section' => $section->get('id'),
                     'values' => array()
                 );
 
-                $results = (new EntryManager)->select()->projection(['e.id'])->section($section->get('id'))->limit($limit)->execute()->column('id');
+                $results = (new EntryManager)
+                    ->select()
+                    ->projection(['e.id'])
+                    ->section($section->get('id'))
+                    ->limit($limit)
+                    ->execute()
+                    ->column('id');
 
                 // if a value is already selected, ensure it is added to the list (if it isn't in the available options)
                 if(!is_null($existing_selection) && !empty($existing_selection)){
@@ -243,7 +253,13 @@
             $where = ' AND id IN (' . implode(',', $this->get('related_field_id')) . ') ';
             $hash = md5($where);
             if(!isset(self::$cache[$hash]['fields'])) {
-                $fields = FieldManager::fetch(null, null, 'ASC', 'sortorder', null, null, $where);
+                $fields = (new FieldManager)
+                    ->select()
+                    ->sort('sortorder', 'asc')
+                    ->where(['id' => ['in' => $this->get('related_field_id')]])
+                    ->execute()
+                    ->rows();
+
                 if(!is_array($fields)) {
                     $fields = array($fields);
                 }
@@ -302,11 +318,22 @@
                         }
                     }
 
-                    $section = SectionManager::fetch($section_id);
+                    $section = (new SectionManager)
+                        ->select()
+                        ->section($section_id)
+                        ->execute()
+                        ->next();
+
                     if(($section instanceof Section) === false) continue;
 
-                    EntryManager::setFetchSorting($section->getSortingField(), $section->getSortingOrder());
-                    $entries = EntryManager::fetch(array_values($entry_data), $section_id, null, null, null, null, false, true, $schema);
+                    $entries = (new EntryManager)
+                        ->select()
+                        ->sort($section->getSortingField(), $section->getSortingOrder())
+                        ->entries(array_values($entry_data))
+                        ->section($section_id)
+                        ->schema($schema)
+                        ->execute()
+                        ->rows();
 
                     foreach ($entries as $entry) {
                         $field_data = $entry->getData($field->get('id'));
@@ -798,7 +825,11 @@
             else if ($mode === $modes->listEntryObject) {
                 $items = array();
 
-                $entries = EntryManager::fetch($data['relation_id']);
+                $entries = (new EntryManager)
+                    ->select()
+                    ->entry($data['relation_id'])
+                    ->execute()
+                    ->rows();
                 foreach ($entries as $entry) {
                     if (is_array($entry) === false || empty($entry)) continue;
 
@@ -1046,7 +1077,11 @@
             $groups = array($this->get('element_name') => array());
 
             $related_field_id = current($this->get('related_field_id'));
-            $field = FieldManager::fetch($related_field_id);
+            $field = (new FieldManager)
+                ->select()
+                ->field($related_field_id)
+                ->execute()
+                ->next();
 
             if(!$field instanceof Field) return;
 
@@ -1067,7 +1102,14 @@
                     }
                 }
                 else {
-                    $related_data = EntryManager::fetch($value, $field->get('parent_section'), 1, null, null, null, false, true, array($field->get('element_name')));
+                    $related_data = (new EntryManager)
+                        ->select()
+                        ->entry($value)
+                        ->section($field->get('parent_section'))
+                        ->schema($field->get('element_name'))
+                        ->limit(1)
+                        ->execute()
+                        ->next();
                     $related_data = current($related_data);
 
                     if(!$related_data instanceof Entry) continue;
