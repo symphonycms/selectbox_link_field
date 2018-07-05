@@ -281,7 +281,6 @@
             $hash = md5(serialize($relation_id).$this->get('element_name'));
 
             if(!isset(self::$cache[$hash]['relation_data'])) {
-                // $relation_ids = Symphony::Database()->fetch(sprintf("
                 $relation_ids = Symphony::Database()
                     ->select(['e.id', 'e.section_id', 's.name', 's.handle'])
                     ->from('tbl_entries', 'e')
@@ -331,6 +330,7 @@
                         ->sort($section->getSortingField(), $section->getSortingOrder())
                         ->entries(array_values($entry_data))
                         ->section($section_id)
+                        ->includeAllFields()
                         ->schema($schema)
                         ->execute()
                         ->rows();
