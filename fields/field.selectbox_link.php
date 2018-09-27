@@ -327,9 +327,9 @@
 
                     $entries = (new EntryManager)
                         ->select()
+                        ->section($section_id)
                         ->sort($section->getSortingField(), $section->getSortingOrder())
                         ->entries(array_values($entry_data))
-                        ->section($section_id)
                         ->includeAllFields()
                         ->schema($schema)
                         ->execute()
