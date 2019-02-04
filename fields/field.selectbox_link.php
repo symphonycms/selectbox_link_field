@@ -208,15 +208,13 @@
 
             if(!is_array($data)) return $data;
 
-            $searchvalue = Symphony::Database()
+            return Symphony::Database()
                 ->select(['entry_id'])
                 ->from('tbl_entries_data_' . $field_id)
                 ->where(['handle' => addslashes($data['handle'])])
                 ->limit(1)
                 ->execute()
-                ->rows();
-
-            return $searchvalue['entry_id'];
+                ->variable('entry_id');
         }
 
         public function findEntriesForField(array $relation_id = array(), $field_id = null) {
