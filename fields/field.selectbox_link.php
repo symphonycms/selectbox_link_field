@@ -1102,7 +1102,7 @@
                         ->select()
                         ->entry($value)
                         ->section($field->get('parent_section'))
-                        ->schema($field->get('element_name'))
+                        ->schema([$field->get('element_name')])
                         ->limit(1)
                         ->execute()
                         ->next();
