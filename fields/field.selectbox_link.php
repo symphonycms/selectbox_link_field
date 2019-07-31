@@ -1106,7 +1106,6 @@
                         ->limit(1)
                         ->execute()
                         ->next();
-                    $related_data = current($related_data);
 
                     if(!$related_data instanceof Entry) continue;
 
