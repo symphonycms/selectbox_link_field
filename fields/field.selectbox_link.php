@@ -4,6 +4,7 @@
 
     require_once FACE . '/interface.exportablefield.php';
     require_once FACE . '/interface.importablefield.php';
+    require_once(EXTENSIONS . '/selectbox_link_field/lib/class.entryquerylinkadapter.php');
 
     class FieldSelectBox_Link extends Field implements ExportableField, ImportableField {
         private static $cache = array();
@@ -14,6 +15,8 @@
 
         public function __construct(){
             parent::__construct();
+            $this->entryQueryFieldAdapter = new EntryQueryLinkAdapter($this);
+
             $this->_name = __('Select Box Link');
             $this->_required = true;
             $this->_showassociation = true;
@@ -72,16 +75,27 @@
     -------------------------------------------------------------------------*/
 
         public function createTable(){
-            return Symphony::Database()->query(
-                "CREATE TABLE IF NOT EXISTS `tbl_entries_data_" . $this->get('id') . "` (
-                    `id` int(11) unsigned NOT NULL auto_increment,
-                    `entry_id` int(11) unsigned NOT NULL,
-                    `relation_id` int(11) unsigned DEFAULT NULL,
-                    PRIMARY KEY (`id`),
-                    KEY `entry_id` (`entry_id`),
-                    KEY `relation_id` (`relation_id`)
-                ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
-            );
+            return Symphony::Database()
+                ->create('tbl_entries_data_' . $this->get('id'))
+                ->ifNotExists()
+                ->fields([
+                    'id' => [
+                        'type' => 'int(11)',
+                        'auto' => true,
+                    ],
+                    'entry_id' => 'int(11)',
+                    'relation_id' => [
+                        'type' => 'int(11)',
+                        'null' => true,
+                    ],
+                ])
+                ->keys([
+                    'id' => 'primary',
+                    'entry_id' => 'key',
+                    'relation_id' => 'key',
+                ])
+                ->execute()
+                ->success();
         }
 
     /*-------------------------------------------------------------------------
@@ -95,56 +109,60 @@
             $this->_settings[$field] = $value;
         }
 
-        public function findOptions(array $existing_selection=NULL,$entry_id=NULL){
+        public function findOptions(array $existing_selection = null, $entry_id = null){
             $values = array();
             $limit = $this->get('limit');
 
             if(!is_array($this->get('related_field_id'))) return $values;
 
-            // find the sections of the related fields
-            $sections = Symphony::Database()->fetch("
-                SELECT DISTINCT `s`.`id`, `s`.`sortorder`, `f`.`id` as `field_id`
-                FROM `tbl_sections` AS `s`
-                LEFT JOIN `tbl_fields` AS `f` ON `s`.`id` = `f`.`parent_section`
-                WHERE `f`.`id` IN ('" . implode("','", $this->get('related_field_id')) . "')
-                ORDER BY `s`.`sortorder` ASC
-            ");
+            $sections = Symphony::Database()
+                ->select(['s.id', 's.sortorder', 'f.id' => 'field_id'])
+                ->distinct()
+                ->from('tbl_sections', 's')
+                ->leftJoin('tbl_fields', 'f')
+                ->on(['s.id' => '$f.parent_section'])
+                ->where(['f.id' => ['in' => $this->get('related_field_id')]])
+                ->orderBy('s.sortorder')
+                ->execute()
+                ->rows();
 
-            if(is_array($sections) && !empty($sections)){
-                foreach($sections as $_section) {
-                    $section = SectionManager::fetch($_section['id']);
-                    $group = array(
-                        'name' => $section->get('name'),
-                        'section' => $section->get('id'),
-                        'values' => array()
-                    );
+            foreach($sections as $_section) {
+                $section = (new SectionManager)
+                    ->select()
+                    ->section($_section['id'])
+                    ->execute()
+                    ->next();
+                $group = array(
+                    'name' => $section->get('name'),
+                    'section' => $section->get('id'),
+                    'values' => array()
+                );
 
-                    EntryManager::setFetchSorting($section->getSortingField(), $section->getSortingOrder());
-                    $entries = EntryManager::fetch(NULL, $section->get('id'), $limit, 0, null, null, false, false);
+                $results = (new EntryManager)
+                    ->select()
+                    ->projection(['e.id'])
+                    ->section($section->get('id'))
+                    ->limit($limit)
+                    ->execute()
+                    ->column('id');
 
-                    $results = array();
-                    foreach($entries as $entry) {
-                        $results[] = (int)$entry['id'];
-                    }
-
-                    // if a value is already selected, ensure it is added to the list (if it isn't in the available options)
-                    if(!is_null($existing_selection) && !empty($existing_selection)){
-                        $entries_for_field = $this->findEntriesForField($existing_selection, $_section['field_id']);
-                        $results = array_merge($results, $entries_for_field);
-                    }
-
-                    if(is_array($results) && !empty($results)){
-                        $related_values = $this->findRelatedValues($results);
-                        foreach($related_values as $value){
-                            $group['values'][$value['id']] = $value['value'];
-                        }
-                    }
-
-                    if(!is_null($entry_id) && isset($group['values'][$entry_id])){
-                        unset($group['values'][$entry_id]);
-                    }
-                    $values[] = $group;
+                // if a value is already selected, ensure it is added to the list (if it isn't in the available options)
+                if(!is_null($existing_selection) && !empty($existing_selection)){
+                    $entries_for_field = $this->findEntriesForField($existing_selection, $_section['field_id']);
+                    $results = array_merge($results, $entries_for_field);
                 }
+
+                if(is_array($results) && !empty($results)){
+                    $related_values = $this->findRelatedValues($results);
+                    foreach($related_values as $value){
+                        $group['values'][$value['id']] = $value['value'];
+                    }
+                }
+
+                if(!is_null($entry_id) && isset($group['values'][$entry_id])){
+                    unset($group['values'][$entry_id]);
+                }
+                $values[] = $group;
             }
 
             return $values;
@@ -161,62 +179,59 @@
             return $output;
         }
 
-        public function toggleFieldData(array $data, $newState, $entry_id=null){
+        public function toggleFieldData(array $data, $newState, $entry_id = null){
             $data['relation_id'] = $newState;
             return $data;
         }
 
         public function fetchAssociatedEntryCount($value){
-            return Symphony::Database()->fetchVar('count', 0, sprintf("
-                    SELECT COUNT(*) as `count`
-                    FROM `tbl_entries_data_%d`
-                    WHERE `relation_id` = %d
-                ",
-                $this->get('id'), $value
-            ));
+            return Symphony::Database()
+                ->select(['COUNT(*)' => 'count'])
+                ->from('tbl_entries_data_' . $this->get('id'))
+                ->where(['relation_id' => $value])
+                ->execute()
+                ->variable('count');
         }
 
         public function fetchAssociatedEntryIDs($value){
-            return Symphony::Database()->fetchCol('entry_id', sprintf("
-                    SELECT `entry_id`
-                    FROM `tbl_entries_data_%d`
-                    WHERE `relation_id` = %d
-                ",
-                $this->get('id'), $value
-            ));
+            return Symphony::Database()
+                ->select(['entry_id'])
+                ->from('tbl_entries_data_' . $this->get('id'))
+                ->where(['relation_id' => $value])
+                ->execute()
+                ->variable('entry_id');
         }
 
-        public function fetchAssociatedEntrySearchValue($data, $field_id=NULL, $parent_entry_id=NULL){
+        public function fetchAssociatedEntrySearchValue($data, $field_id = null, $parent_entry_id = null){
             // We dont care about $data, but instead $parent_entry_id
             if(!is_null($parent_entry_id)) return $parent_entry_id;
 
             if(!is_array($data)) return $data;
 
-            $searchvalue = Symphony::Database()->fetchRow(0, sprintf("
-                SELECT `entry_id` FROM `tbl_entries_data_%d`
-                WHERE `handle` = '%s'
-                LIMIT 1",
-                $field_id, addslashes($data['handle'])
-            ));
-
-            return $searchvalue['entry_id'];
+            return Symphony::Database()
+                ->select(['entry_id'])
+                ->from('tbl_entries_data_' . $field_id)
+                ->where(['handle' => addslashes($data['handle'])])
+                ->limit(1)
+                ->execute()
+                ->variable('entry_id');
         }
 
         public function findEntriesForField(array $relation_id = array(), $field_id = null) {
             if(empty($relation_id) || !is_array($this->get('related_field_id'))) return array();
 
             try {
-                // Figure out which `related_field_id` is from that section
-                $relations = Symphony::Database()->fetchCol('id', sprintf("
-                        SELECT e.id
-                        FROM `tbl_fields` AS `f`
-                        LEFT JOIN `tbl_sections` AS `s` ON (f.parent_section = s.id)
-                        LEFT JOIN `tbl_entries` AS `e` ON (e.section_id = s.id)
-                        WHERE f.id = %d
-                        AND e.id IN (%s)
-                    ",
-                    $field_id, implode(',',$relation_id), implode(',', $this->get('related_field_id'))
-                ));
+                $relations = Symphony::Database()
+                    ->select(['e.id'])
+                    ->from('tbl_fields', 'f')
+                    ->leftJoin('tbl_sections', 's')
+                    ->on(['f.parent_section' => '$s.id'])
+                    ->leftJoin('tbl_entries', 'e')
+                    ->on(['e.section_id' => '$s.id'])
+                    ->where(['f.id' => (int)$field_id])
+                    ->where(['e.id' => ['in' => $relation_id]])
+                    ->execute()
+                    ->column('id');
             }
             catch(Exception $e){
                 return array();
@@ -234,7 +249,13 @@
             $where = ' AND id IN (' . implode(',', $this->get('related_field_id')) . ') ';
             $hash = md5($where);
             if(!isset(self::$cache[$hash]['fields'])) {
-                $fields = FieldManager::fetch(null, null, 'ASC', 'sortorder', null, null, $where);
+                $fields = (new FieldManager)
+                    ->select()
+                    ->sort('sortorder', 'asc')
+                    ->where(['id' => ['in' => $this->get('related_field_id')]])
+                    ->execute()
+                    ->rows();
+
                 if(!is_array($fields)) {
                     $fields = array($fields);
                 }
@@ -256,14 +277,14 @@
             $hash = md5(serialize($relation_id).$this->get('element_name'));
 
             if(!isset(self::$cache[$hash]['relation_data'])) {
-                $relation_ids = Symphony::Database()->fetch(sprintf("
-                    SELECT e.id, e.section_id, s.name, s.handle
-                    FROM `tbl_entries` AS `e`
-                    LEFT JOIN `tbl_sections` AS `s` ON (s.id = e.section_id)
-                    WHERE e.id IN (%s)
-                    ",
-                    implode(',', $relation_id)
-                ));
+                $relation_ids = Symphony::Database()
+                    ->select(['e.id', 'e.section_id', 's.name', 's.handle'])
+                    ->from('tbl_entries', 'e')
+                    ->leftJoin('tbl_sections', 's')
+                    ->on(['s.id' => '$e.section_id'])
+                    ->where(['e.id' => ['in' => $relation_id]])
+                    ->execute()
+                    ->rows();
 
                 // 3. Group the `relation_id`'s by section_id
                 $section_ids = array();
@@ -292,11 +313,23 @@
                         }
                     }
 
-                    $section = SectionManager::fetch($section_id);
+                    $section = (new SectionManager)
+                        ->select()
+                        ->section($section_id)
+                        ->execute()
+                        ->next();
+
                     if(($section instanceof Section) === false) continue;
 
-                    EntryManager::setFetchSorting($section->getSortingField(), $section->getSortingOrder());
-                    $entries = EntryManager::fetch(array_values($entry_data), $section_id, null, null, null, null, false, true, $schema);
+                    $entries = (new EntryManager)
+                        ->select()
+                        ->section($section_id)
+                        ->sort($section->getSortingField(), $section->getSortingOrder())
+                        ->entries(array_values($entry_data))
+                        ->includeAllFields()
+                        ->schema($schema)
+                        ->execute()
+                        ->rows();
 
                     foreach ($entries as $entry) {
                         $field_data = $entry->getData($field->get('id'));
@@ -374,15 +407,13 @@
 
             foreach($related_field_ids as $related_field_id) {
                 try {
-                    $return = Symphony::Database()->fetchCol("id", sprintf("
-                        SELECT
-                            `entry_id` as `id`
-                        FROM
-                            `tbl_entries_data_%d`
-                        WHERE
-                            `handle` = '%s'
-                        LIMIT 1", $related_field_id, Lang::createHandle($value)
-                    ));
+                    return Symphony::Database()
+                        ->select(['entry_id' => 'id'])
+                        ->from('tbl_entries_data_' . $related_field_id)
+                        ->where(['handle' => Lang::createHandle($value)])
+                        ->limit(1)
+                        ->execute()
+                        ->column('id');
 
                     // Skipping returns wrong results when doing an
                     // AND operation, return 0 instead.
@@ -446,7 +477,7 @@
             $wrapper->appendChild($label);
 
             // Options
-            $div = new XMLElement('div', NULL, array('class' => 'two columns'));
+            $div = new XMLElement('div', null, array('class' => 'two columns'));
             $wrapper->appendChild($div);
 
             // Allow selection of multiple items
@@ -481,7 +512,7 @@
         }
 
         public function checkPostFieldData($data, &$message, $entry_id = null){
-            $message = NULL;
+            $message = null;
 
             if (is_array($data)) {
                 $data = isset($data['relation_id'])
@@ -528,7 +559,7 @@
 
             SectionManager::removeSectionAssociation($id);
             foreach($this->get('related_field_id') as $field_id){
-                SectionManager::createSectionAssociation(NULL, $id, $field_id, $this->get('show_association') == 'yes' ? true : false);
+                SectionManager::createSectionAssociation(null, $id, $field_id, $this->get('show_association') == 'yes' ? true : false);
             }
 
             return true;
@@ -541,7 +572,7 @@
         public function displayPublishPanel(XMLElement &$wrapper, $data = null, $flagWithError = null, $fieldnamePrefix = null, $fieldnamePostfix = null, $entry_id = null) {
             $entry_ids = array();
             $options = array(
-                array(NULL, false, NULL)
+                array(null, false, null)
             );
 
             if(!is_null($data['relation_id'])){
@@ -582,7 +613,7 @@
             if($this->get('required') != 'yes') $label->appendChild(new XMLElement('i', __('Optional')));
             $label->appendChild(
                 Widget::Select($fieldname, $options, ($this->get('allow_multiple_selection') == 'yes' ? array(
-                    'multiple' => 'multiple') : NULL
+                    'multiple' => 'multiple') : null
                 ))
             );
 
@@ -592,7 +623,7 @@
             else $wrapper->appendChild($label);
         }
 
-        public function processRawFieldData($data, &$status, &$message=null, $simulate=false, $entry_id=null) {
+        public function processRawFieldData($data, &$status, &$message = null, $simulate = false, $entry_id = null) {
             $status = self::__OK__;
             $result = array();
 
@@ -640,7 +671,7 @@
             $wrapper->appendChild($list);
         }
 
-        public function getParameterPoolValue(array $data, $entry_id=NULL){
+        public function getParameterPoolValue(array $data, $entry_id = null){
             return $this->prepareExportValue($data, ExportableField::LIST_OF + ExportableField::ENTRY, $entry_id);
         }
 
@@ -790,7 +821,11 @@
             else if ($mode === $modes->listEntryObject) {
                 $items = array();
 
-                $entries = EntryManager::fetch($data['relation_id']);
+                $entries = (new EntryManager)
+                    ->select()
+                    ->entry($data['relation_id'])
+                    ->execute()
+                    ->rows();
                 foreach ($entries as $entry) {
                     if (is_array($entry) === false || empty($entry)) continue;
 
@@ -854,7 +889,7 @@
             );
         }
 
-        public function buildDSRetrievalSQL($data, &$joins, &$where, $andOperation=false){
+        public function buildDSRetrievalSQL($data, &$joins, &$where, $andOperation = false){
             $field_id = $this->get('id');
 
             if(preg_match('/^sql:\s*/', $data[0], $matches)) {
@@ -947,10 +982,12 @@
 
         protected function getFieldSchema($fieldId) {
             try {
-                return Symphony::Database()->fetch("
-                    SHOW COLUMNS FROM `tbl_entries_data_$fieldId`
-                        WHERE `Field` in ('value');
-                ");
+                return Symphony::Database()
+                    ->showColumns()
+                    ->from('tbl_entries_data_' . $fieldId)
+                    ->where(['Field' => ['in' => ['value']]])
+                    ->execute()
+                    ->rows();
             }
             catch (Exception $ex) {
                 // bail out
@@ -966,7 +1003,7 @@
             return explode(',', $related_field_id);
         }
 
-        public function buildSortingSQL(&$joins, &$where, &$sort, $order='ASC'){
+        public function buildSortingSQL(&$joins, &$where, &$sort, $order = 'ASC'){
             if(in_array(strtolower($order), array('random', 'rand'))) {
                 $sort = 'ORDER BY RAND()';
             }
@@ -1036,7 +1073,11 @@
             $groups = array($this->get('element_name') => array());
 
             $related_field_id = current($this->get('related_field_id'));
-            $field = FieldManager::fetch($related_field_id);
+            $field = (new FieldManager)
+                ->select()
+                ->field($related_field_id)
+                ->execute()
+                ->next();
 
             if(!$field instanceof Field) return;
 
@@ -1057,8 +1098,14 @@
                     }
                 }
                 else {
-                    $related_data = EntryManager::fetch($value, $field->get('parent_section'), 1, null, null, null, false, true, array($field->get('element_name')));
-                    $related_data = current($related_data);
+                    $related_data = (new EntryManager)
+                        ->select()
+                        ->entry($value)
+                        ->section($field->get('parent_section'))
+                        ->schema([$field->get('element_name')])
+                        ->limit(1)
+                        ->execute()
+                        ->next();
 
                     if(!$related_data instanceof Entry) continue;
 
